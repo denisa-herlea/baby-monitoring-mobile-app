@@ -42,6 +42,7 @@ def calculate_sleep_durations(baby_id, week_start_date):
 
 
 class SleepTrackingScreen(Screen):
+    baby_name = 'Anna'
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         with self.canvas.before:

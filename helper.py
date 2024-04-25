@@ -190,6 +190,14 @@ ScreenManager:
         text: "Skip for now"
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        
+    MDIconButton:
+        icon: "arrow-right-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.8, 'center_y': 0.1}
+        on_press: root.manager.current = 'Home'
+        elevation_normal: 12
   
 <AccountScreen>:
     name: 'Account'
@@ -354,7 +362,7 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
     MDLabel:
-        text: "Baby ... has slept today ... hours!"
+        text: 'Baby ... has slept today ... hours!'
         halign: "center"
         theme_text_color: "Secondary"
         font_style: "H6"
@@ -362,13 +370,13 @@ ScreenManager:
         
     MDFloatingActionButton:
         icon: "plus"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         md_bg_color: 0.9, 0.68, 0.86, 1
         on_press: root.manager.current = 'SleepEntry'
         
     MDFillRoundFlatButton:
         text: "Sleep History"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.4}
         on_release: root.plot_sleep_chart_call()
         #on_release: root.create_sleep_chart()
         
@@ -389,7 +397,7 @@ ScreenManager:
         theme_text_color: "Custom"
         text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
     MDTextField:
         id: start_hour
@@ -442,12 +450,12 @@ ScreenManager:
     MDFloatingActionButton:
         icon: "check-bold"
         md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.5, 'center_y': 0.3}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_release: root.add_sleep_entry("", root.ids.start_hour.text, root.ids.end_hour.text, root.ids.sleep_date.text, root.ids.sleep_notes.text)
         
     MDFillRoundFlatButton:
         text: "Back"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'SleepTracking'
     
     
@@ -473,12 +481,12 @@ ScreenManager:
     MDFloatingActionButton:
         icon: "plus"
         md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         on_press: root.manager.current = 'FeedingEntry'
         
     MDFillRoundFlatButton:
         text: "Feeding History"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.4}
         #on_release: root.plot_sleep_chart_call()
         
     MDFillRoundFlatButton:

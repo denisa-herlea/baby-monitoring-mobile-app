@@ -148,7 +148,7 @@ class AccountScreen(Screen):
                 ),
                 MDFlatButton(
                     text="DELETE",
-                    on_release=lambda x: (self.delete_account(), self.dialog.dismiss(dialog))
+                    on_release=lambda x: (self.delete_account(), self.dismiss_dialog(dialog))
                 )
             ]
         )
@@ -166,6 +166,8 @@ class AccountScreen(Screen):
             print(f"An error occurred while trying to delete the account: {e}")
         finally:
             conn.close()
+        #self.manager.get_screen('Login').ids.username.text = ''
+        #self.manager.get_screen('Login').ids.password.text = ''
         self.manager.current = 'Login'
 
     def show_success_delete(self):

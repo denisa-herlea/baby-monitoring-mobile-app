@@ -22,7 +22,8 @@ class FeedingEntryScreen(Screen):
         return app.current_user_id
 
     def add_food_entry(self, baby_id, feed_hour, feed_date, ml, notes):
-        user_id = self.current_user_id
+        user_id = self.get_user_id()
+        app = MDApp.get_running_app()
 
         if feed_hour and feed_date:
             conn = sqlite3.connect('baby-v.db')
@@ -41,9 +42,6 @@ class FeedingEntryScreen(Screen):
             conn.close()
 
         if not feed_hour:
-            self.manager.get_screen('FeedingEntry').ids.feed_hour.line_color_normal = self.theme_cls.error_color
-            self.manager.get_screen('FeedingEntry').ids.feed_hour.helper_text = "Feed hour cannot be empty."
+            self.manager.get_screen('FeedingEntry').ids.feed_hour.line_color_normal = app.theme_cls.error_color
         if not feed_date:
-            self.manager.get_screen('FeedingEntry').ids.feed_date.line_color_normal = self.theme_cls.error_color
-            self.manager.get_screen('FeedingEntry').ids.feed_date.helper_text = "Feed date cannot be empty."
-            
+            self.manager.get_screen('FeedingEntry').ids.feed_date.line_color_normal = app.theme_cls.error_color

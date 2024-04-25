@@ -3,8 +3,6 @@ from kivymd.app import MDApp
 
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
-from kivymd.uix.button import MDFlatButton
-from kivymd.uix.dialog import MDDialog
 
 
 class SleepEntryScreen(Screen):
@@ -25,7 +23,8 @@ class SleepEntryScreen(Screen):
         return app.current_user_id
 
     def add_sleep_entry(self, baby_id, start_hour, end_hour, sleep_date, notes):
-        user_id = self.current_user_id
+        user_id = self.get_user_id()
+        app = MDApp.get_running_app()
 
         if start_hour and end_hour and sleep_date:
             conn = sqlite3.connect('baby-v.db')
@@ -44,11 +43,8 @@ class SleepEntryScreen(Screen):
             conn.close()
 
         if not start_hour:
-            self.manager.get_screen('SleepEntry').ids.start_hour.line_color_normal = self.theme_cls.error_color
-            self.manager.get_screen('SleepEntry').ids.start_hour.helper_text = "Start hour cannot be empty."
+            self.manager.get_screen('SleepEntry').ids.start_hour.line_color_normal = app.theme_cls.error_color
         if not end_hour:
-            self.manager.get_screen('SleepEntry').ids.end_hour.line_color_normal = self.theme_cls.error_color
-            self.manager.get_screen('SleepEntry').ids.end_hour.helper_text = "End hour cannot be empty."
+            self.manager.get_screen('SleepEntry').ids.end_hour.line_color_normal = app.theme_cls.error_color
         if not sleep_date:
-            self.manager.get_screen('SleepEntry').ids.sleep_date.line_color_normal = self.theme_cls.error_color
-            self.manager.get_screen('SleepEntry').ids.sleep_date.helper_text = "Date cannot be empty."
+            self.manager.get_screen('SleepEntry').ids.sleep_date.line_color_normal = app.theme_cls.error_color

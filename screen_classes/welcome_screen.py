@@ -32,16 +32,17 @@ class WelcomeScreen(Screen):
         return app.current_user_id
 
     def clear_baby_fields(self):
-        self.ids.baby_name_input.text = ''
-        self.ids.date_of_birth_input.text = ''
-        self.ids.hour_of_birth_input.text = ''
-        self.ids.birth_weight_input.text = ''
-        self.ids.birth_height_input.text = ''
+        self.manager.get_screen('Welcome').ids.baby_name.text = ''
+        self.manager.get_screen('Welcome').ids.date_of_birth.text = ''
+        self.manager.get_screen('Welcome').ids.hour_of_birth.text = ''
+        self.manager.get_screen('Welcome').ids.birth_weight.text = ''
+        self.manager.get_screen('Welcome').ids.birth_height.text = ''
 
     def close_dialog(self, obj):
         self.dialog.dismiss()
 
     def save_baby_details(self, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height):
+        app = MDApp.get_running_app()
         if baby_name:
             user_id = self.get_user_id()
             conn = sqlite3.connect('baby-v.db')
@@ -54,8 +55,7 @@ class WelcomeScreen(Screen):
             conn.close()
             self.show_success_dialog_add_baby()
         else:
-            self.manager.get_screen('Welcome').ids.baby_name.line_color_normal = self.theme_cls.error_color
-            self.manager.get_screen('Welcome').ids.baby_name.helper_text = "Baby name cannot be empty."
+            self.manager.get_screen('Welcome').ids.baby_name.line_color_normal = app.theme_cls.error_color
 
     def show_success_dialog_add_baby(self):
         dialog = MDDialog(
@@ -78,7 +78,7 @@ class WelcomeScreen(Screen):
 
     def add_another_baby(self, dialog):
         self.dismiss_dialog(dialog)
-        # self.clear_baby_fields()
+        self.clear_baby_fields()
         self.manager.current  = 'Welcome'
 
     def dismiss_dialog(self, dialog):
