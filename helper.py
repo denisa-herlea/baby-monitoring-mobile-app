@@ -10,9 +10,9 @@ ScreenManager:
     GrowthHealthTrackingScreen:
     LullabiesScreen:
     VideoScreen:
-    AudioScreen:
     SleepEntryScreen:
     FeedingEntryScreen:
+    AccountScreen:
 
 <LoginScreen>:
     name: 'Login'
@@ -177,10 +177,74 @@ ScreenManager:
         text: "Skip for now"
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+  
+<AccountScreen>:
+    name: 'Account'
+    MDLabel:
+        text: "Manage your Account"
+        halign: "center"
+        theme_text_color: "Secondary"
+        font_style: "H6"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+
+    MDTextField:
+        id: password
+        hint_text: "Enter new password"
+        helper_text: "Update your password"
+        helper_text_mode: "on_focus"
+        pos_hint: {'center_x': 0.35, 'center_y': 0.7}
+        size_hint_x: None
+        width: 250
         
+    MDFillRoundFlatButton:
+        text: "Update password"
+        pos_hint: {'center_x': 0.75, 'center_y': 0.7}
+        #on_press: root.update_password()
+
+    MDTextField:
+        id: first_name
+        hint_text: "Enter new first name"
+        helper_text: "Update your first name"
+        helper_text_mode: "on_focus"
+        pos_hint: {'center_x': 0.35, 'center_y': 0.6}
+        size_hint_x: None
+        width: 250
+        
+    MDFillRoundFlatButton:
+        text: "Update first name"
+        pos_hint: {'center_x': 0.75, 'center_y': 0.6}
+        #on_press: root.update_first_name()
+
+    MDTextField:
+        id: last_name
+        hint_text: "Enter new last name"
+        helper_text: "Update your last name"
+        helper_text_mode: "on_focus"
+        pos_hint: {'center_x': 0.35, 'center_y': 0.5}
+        size_hint_x: None
+        width: 250
+        
+    MDFillRoundFlatButton:
+        text: "Update last name"
+        pos_hint: {'center_x': 0.75, 'center_y': 0.5}
+        #on_press: root.update_last_name()
+        #on_press: root.get_user_id()
+
+    MDFillRoundFlatButton:
+        text: "Back"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        on_press: root.manager.current = 'Home'
+
         
 <HomeScreen>:        
     name: 'Home'
+    MDIconButton:
+        icon: "account-details"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.1, 'center_y': 0.95}
+        on_press: root.manager.current = 'Account'
+        elevation_normal: 12
     MDFillRoundFlatButton:
         text: "Sleep Tracking"
         pos_hint: {'center_x': 0.5, 'center_y': 0.8}
@@ -202,11 +266,11 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.4}
         on_press: root.manager.current = 'Video'
     MDFloatingActionButton:
-        icon: "account-voice"
+        icon: root.icon_audio
         size_hint: None, None
         size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
-        on_press: root.manager.current = 'Audio'
+        on_press: root.toggle_icon_audio()
         elevation_normal: 12
        
         
@@ -410,27 +474,10 @@ ScreenManager:
         height: '200dp'
         pos_hint: {'center_x':0.5, 'center_y':0.4}
     
-    BoxLayout:
-        orientation: 'horizontal'
-        size_hint_y: None
-        height: dp(48)
-        pos_hint: {'center_x': 0.5, 'center_y': 0.3}
-
-        MDCheckbox:
-            id: confirm_checkbox
-            size_hint: None, None
-            size: dp(48), dp(48)
-            #on_active: root.handle_checkbox_active(args[1])
-
-        MDLabel:
-            text: "Confirm to log milk intake"
-            size_hint_y: None
-            height: dp(48)
-    
     MDFloatingActionButton:
         icon: "check-bold"
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
-        on_release:  app.add_food_entry("", root.ids.feed_hour.text, root.ids.feed_date.text, root.ids.confirm_checkbox.active and int(root.ids.milk_slider.value), root.ids.feed_notes.text)
+        on_release:  app.add_food_entry("", root.ids.feed_hour.text, root.ids.feed_date.text, int(root.ids.milk_slider.value), root.ids.feed_notes.text)
         
     MDFillRoundFlatButton:
         text: "Back"
@@ -502,27 +549,16 @@ ScreenManager:
         size: root.width, root.height
         pos: 0, 0
         
+    MDFloatingActionButton:
+        icon: root.icon
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        on_press: root.toggle_icon()
+        elevation_normal: 12
+        
     MDFillRoundFlatButton:
         text: "Back"
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
-        
-        
-        
-    
-<AudioScreen>:        
-    name: 'Audio'
-    
-    MDLabel:
-        text: "Audio"
-        halign: "center"
-        theme_text_color: "Secondary"
-        font_style: "H6"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
-        
-    MDFillRoundFlatButton:
-        text: "Back"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.3}
-        on_press: root.manager.current = 'Home'
-    
 """

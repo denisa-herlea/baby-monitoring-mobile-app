@@ -1,3 +1,8 @@
+from kivy.config import Config
+
+Config.set('graphics', 'width', '360')
+Config.set('graphics', 'height', '640')
+
 import sqlite3
 from datetime import datetime
 
@@ -25,10 +30,9 @@ from screen_classes.sleep_tracking_screen import SleepTrackingScreen
 from screen_classes.feeding_tracking_screen import FeedingTrackingScreen
 from screen_classes.growth_health_tracking_screen import GrowthHealthTrackingScreen
 from screen_classes.video_screen import VideoScreen
-from screen_classes.audio_screen import AudioScreen
 from screen_classes.sleep_entry_screen import SleepEntryScreen
 from screen_classes.feeding_entry_screen import FeedingEntryScreen
-
+from screen_classes.account_screen import AccountScreen
 
 sm = ScreenManager()
 sm.add_widget(LoginScreen(name='Login'))
@@ -40,9 +44,9 @@ sm.add_widget(SleepTrackingScreen(name='SleepTracking'))
 sm.add_widget(GrowthHealthTrackingScreen(name='GrowthHealthTracking'))
 sm.add_widget(LullabiesScreen(name='Lullabies'))
 sm.add_widget(VideoScreen(name='Video'))
-sm.add_widget(AudioScreen(name='Audio'))
 sm.add_widget(SleepEntryScreen(name='SleepEntry'))
 sm.add_widget(FeedingEntryScreen(name='FeedingEntry'))
+sm.add_widget(AccountScreen(name='Account'))
 
 
 class VideoStreamWidget(Image):
@@ -60,7 +64,7 @@ class VideoStreamWidget(Image):
 
 
 class DemoApp(MDApp):
-
+    current_user_id = None
     def build(self):
         self.theme_cls.theme_style = "Light"
         screen = Builder.load_string(screen_helper)
@@ -289,7 +293,6 @@ class DemoApp(MDApp):
 
 
 DemoApp().run()
-
 
 """
 import sounddevice as sd

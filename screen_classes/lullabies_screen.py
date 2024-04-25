@@ -24,10 +24,6 @@ def play_audio(screen, var, btn):
         8: 'lullabies/Lullaby8.mp3',
         9: 'lullabies/Lullaby9.mp3',
         10: 'lullabies/Lullaby10.mp3',
-        11: 'lullabies/Lullaby11.mp3',
-        12: 'lullabies/Lullaby12.mp3',
-        13: 'lullabies/Lullaby13.mp3',
-        14: 'lullabies/Lullaby14.mp3',
     }
     audio_path = audio_paths.get(var, 'lullabies/Default.mp3')
 
