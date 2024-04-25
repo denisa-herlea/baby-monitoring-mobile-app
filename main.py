@@ -33,6 +33,7 @@ from screen_classes.video_screen import VideoScreen
 from screen_classes.sleep_entry_screen import SleepEntryScreen
 from screen_classes.feeding_entry_screen import FeedingEntryScreen
 from screen_classes.account_screen import AccountScreen
+from screen_classes.update_baby_screen import UpdateBabyScreen
 
 sm = ScreenManager()
 sm.add_widget(LoginScreen(name='Login'))
@@ -47,6 +48,7 @@ sm.add_widget(VideoScreen(name='Video'))
 sm.add_widget(SleepEntryScreen(name='SleepEntry'))
 sm.add_widget(FeedingEntryScreen(name='FeedingEntry'))
 sm.add_widget(AccountScreen(name='Account'))
+sm.add_widget(UpdateBabyScreen(name='UpdateBaby'))
 
 
 class VideoStreamWidget(Image):
@@ -65,6 +67,7 @@ class VideoStreamWidget(Image):
 
 class DemoApp(MDApp):
     current_user_id = None
+
     def build(self):
         self.theme_cls.theme_style = "Light"
         screen = Builder.load_string(screen_helper)
@@ -240,57 +243,6 @@ class DemoApp(MDApp):
             )
             self.dialog.open()
         conn.close()
-
-    # --------------------------- ADD TO DB ------------------------------------------
-    def save_baby_details(self, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height):
-        user_id = self.current_user_id
-
-        conn = sqlite3.connect('baby-v.db')
-        c = conn.cursor()
-        c.execute('''
-                INSERT INTO babies (user_id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height)
-                VALUES (?, ?, ?, ?, ?, ?)
-                ''', (user_id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height))
-        conn.commit()
-        conn.close()
-        self.root.current = 'Home'
-
-    def add_sleep_entry(self, baby_id, start_hour, end_hour, sleep_date, notes):
-        user_id = self.current_user_id
-
-        conn = sqlite3.connect('baby-v.db')
-        cursor = conn.cursor()
-
-        cursor.execute('''SELECT id FROM babies WHERE user_id = ? LIMIT 1''', (user_id,))
-        baby = cursor.fetchone()
-
-        if baby is not None:
-            baby_id = baby[0]
-
-        cursor.execute('''INSERT INTO sleep_entries (baby_id, start_hour, end_hour, sleep_date, notes) VALUES (?, ?, ?, 
-        ?, ?)''',
-                       (baby_id, start_hour, end_hour, sleep_date, notes))
-        conn.commit()
-        conn.close()
-
-    def add_food_entry(self, baby_id, feed_hour, feed_date, ml, notes):
-        user_id = self.current_user_id
-
-        conn = sqlite3.connect('baby-v.db')
-        cursor = conn.cursor()
-
-        cursor.execute('''SELECT id FROM babies WHERE user_id = ? LIMIT 1''', (user_id,))
-        baby = cursor.fetchone()
-
-        if baby is not None:
-            baby_id = baby[0]
-
-        cursor.execute('''INSERT INTO food_entries (baby_id, feed_hour, feed_date, ml, notes) VALUES (?, ?, ?, 
-        ?, ?)''',
-                       (baby_id, feed_hour, feed_date, ml, notes))
-        conn.commit()
-        conn.close()
-
 
 DemoApp().run()
 

@@ -1,3 +1,6 @@
+import sqlite3
+from kivymd.app import MDApp
+
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
 
@@ -13,3 +16,34 @@ class FeedingEntryScreen(Screen):
     def _update_rect(self, instance, value):
         self.rect.size = self.size
         self.rect.pos = self.pos
+
+    def get_user_id(self):
+        app = MDApp.get_running_app()
+        return app.current_user_id
+
+    def add_food_entry(self, baby_id, feed_hour, feed_date, ml, notes):
+        user_id = self.current_user_id
+
+        if feed_hour and feed_date:
+            conn = sqlite3.connect('baby-v.db')
+            cursor = conn.cursor()
+
+            cursor.execute('''SELECT id FROM babies WHERE user_id = ? LIMIT 1''', (user_id,))
+            baby = cursor.fetchone()
+
+            if baby is not None:
+                baby_id = baby[0]
+
+            cursor.execute('''INSERT INTO food_entries (baby_id, feed_hour, feed_date, ml, notes) VALUES (?, ?, ?, 
+            ?, ?)''',
+                       (baby_id, feed_hour, feed_date, ml, notes))
+            conn.commit()
+            conn.close()
+
+        if not feed_hour:
+            self.manager.get_screen('FeedingEntry').ids.feed_hour.line_color_normal = self.theme_cls.error_color
+            self.manager.get_screen('FeedingEntry').ids.feed_hour.helper_text = "Feed hour cannot be empty."
+        if not feed_date:
+            self.manager.get_screen('FeedingEntry').ids.feed_date.line_color_normal = self.theme_cls.error_color
+            self.manager.get_screen('FeedingEntry').ids.feed_date.helper_text = "Feed date cannot be empty."
+            

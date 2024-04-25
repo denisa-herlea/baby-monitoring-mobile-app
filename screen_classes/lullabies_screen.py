@@ -67,11 +67,7 @@ class LullabiesScreen(Screen):
                      ("Audio 7", 7),
                      ("Audio 8", 8),
                      ("Audio 9", 9),
-                     ("Audio 10", 10),
-                     ("Audio 11", 11),
-                     ("Audio 12", 12),
-                     ("Audio 13", 13),
-                     ("Audio 14", 14)]
+                     ("Audio 10", 10)]
         for name, var in lullabies:
             self.ids.content.add_widget(self.create_lullaby_item(name, var))
 

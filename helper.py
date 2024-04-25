@@ -13,6 +13,7 @@ ScreenManager:
     SleepEntryScreen:
     FeedingEntryScreen:
     AccountScreen:
+    UpdateBabyScreen:
 
 <LoginScreen>:
     name: 'Login'
@@ -22,6 +23,7 @@ ScreenManager:
         halign: "center"
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+        
     MDTextField:
         id: login_username
         hint_text: "Enter username"
@@ -30,6 +32,7 @@ ScreenManager:
         pos_hint: {'center_x':0.5, 'center_y':0.7}
         size_hint_x: None
         width: 300
+        
     MDTextField:
         id: login_password
         hint_text: "Enter password"
@@ -41,11 +44,12 @@ ScreenManager:
         pos_hint: {'center_x':0.5, 'center_y':0.6}
         size_hint_x: None
         width: 300
+        
     MDFillRoundFlatButton:
         text: "Log in"
         pos_hint: {'center_x': 0.5, 'center_y': 0.4}
-        # md_bg_color: 96/255.0, 96/255.0, 96/255.0, 1
         on_release: app.login(root.ids.login_username.text, root.ids.login_password.text)
+        
     MDFillRoundFlatButton:
         text: "Create an account"
         pos_hint: {'center_x': 0.5, 'center_y': 0.3}
@@ -61,48 +65,53 @@ ScreenManager:
         halign: "center"
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+        
     MDTextField:
         id: username
         hint_text: "Create an username"
         helper_text_mode: "on_error"
         icon_right: "account-box"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.8}
+        pos_hint: {'center_x':0.5, 'center_y':0.7}
         size_hint_x: None
         width:300
+        
     MDTextField:
         id: password
         hint_text: "Create a password"
         icon_right: "lock"
         password: True
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.7}
+        pos_hint: {'center_x':0.5, 'center_y':0.6}
         size_hint_x: None
         width:300
+        
     MDTextField:
         id: first_name
         hint_text: "First Name"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.6}
+        pos_hint: {'center_x':0.5, 'center_y':0.5}
         size_hint_x: None
         width:300
+        
     MDTextField:
         id: last_name
         hint_text: "Last Name"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.5}
+        pos_hint: {'center_x':0.5, 'center_y':0.4}
         size_hint_x: None
         width:300
+        
     MDFillRoundFlatButton:
         text: "Create an account"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.4}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_release: app.create_account(root.ids.username.text, root.ids.password.text, root.ids.first_name.text, root.ids.last_name.text)
+        
     MDFillRoundFlatButton:
         text: "Back"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.3}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_release: app.back_to_login()
-        
-        
+          
         
 <WelcomeScreen>:
     name: 'Welcome'
@@ -113,66 +122,70 @@ ScreenManager:
         text_color: 0, 0, 0, 1
         font_style: "H5"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
-    MDLabel:
-        text: "Before you start, help us meet your baby"
-        halign: "center"
-        theme_text_color: "Secondary"
-        font_style: "H6"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+          
     MDTextField:
         id: baby_name
         hint_text: "Baby Name"
+        helper_text_mode: "on_error"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.7}
+        pos_hint: {'center_x':0.5, 'center_y':0.75}
         size_hint_x: None
         width:300
         mode: "rectangle"
+        
     MDTextField:
         id: date_of_birth
         hint_text: "Date of birth"
         icon_right: "calendar-today"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.6}
+        pos_hint: {'center_x':0.5, 'center_y':0.65}
         size_hint_x: None
         width: 300
         mode: "rectangle"
         on_focus: if self.focus: app.show_date_picker(1)
         readonly: True
+        
     MDTextField:
         id: hour_of_birth
         hint_text: "Hour of birth"
         icon_right: "clock"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.5}
+        pos_hint: {'center_x':0.5, 'center_y':0.55}
         size_hint_x: None
         width: 300
         mode: "rectangle"
         on_focus: if self.focus: app.show_time_picker()
         readonly: True
+        
     MDTextField:
         id: birth_weight
         hint_text: "Weight at birth (kg)"
         icon_right: "baby-carriage"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.4}
+        pos_hint: {'center_x':0.5, 'center_y':0.45}
         size_hint_x: None
         width: 300
         input_type: 'number'
         mode: "rectangle"
+        
     MDTextField:
         id: birth_height
         hint_text: "Height at birth (cm)"
         icon_right: "human-male-height"
         icon_right_color: app.theme_cls.primary_color
-        pos_hint: {'center_x':0.5, 'center_y':0.3}
+        pos_hint: {'center_x':0.5, 'center_y':0.35}
         size_hint_x: None
         width: 300
         input_type: 'number'
         mode: "rectangle"
-    MDFillRoundFlatButton:
-        text: "Done!"
+        
+    MDFloatingActionButton:
+        icon: 'check-bold'
+        elevation_normal: 12
+        md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
-        on_release: app.save_baby_details(root.ids.baby_name.text, root.ids.date_of_birth.text, root.ids.hour_of_birth.text, root.ids.birth_weight.text, root.ids.birth_height.text)
+        on_release: root.save_baby_details(root.ids.baby_name.text, root.ids.date_of_birth.text, root.ids.hour_of_birth.text, root.ids.birth_weight.text, root.ids.birth_height.text)
+        
     MDFillRoundFlatButton:
         text: "Skip for now"
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
@@ -183,61 +196,97 @@ ScreenManager:
     MDLabel:
         text: "Manage your Account"
         halign: "center"
-        theme_text_color: "Secondary"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+        
+    MDIconButton:
+        icon: root.icon_lights
+        elevation_normal: 12
+        pos_hint: {'center_x': 0.9, 'center_y': 0.9}
+        on_press: root.toggle_icon_lights()
 
     MDTextField:
         id: password
-        hint_text: "Enter new password"
-        helper_text: "Update your password"
-        helper_text_mode: "on_focus"
+        hint_text: "Update password"
+        helper_text_mode: "on_error"
         pos_hint: {'center_x': 0.35, 'center_y': 0.7}
         size_hint_x: None
         width: 250
         
-    MDFillRoundFlatButton:
-        text: "Update password"
+    MDFloatingActionButton:
+        icon: 'check-bold'
+        elevation_normal: 12
+        md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.75, 'center_y': 0.7}
-        #on_press: root.update_password()
+        on_press: root.update_password()
 
     MDTextField:
         id: first_name
-        hint_text: "Enter new first name"
-        helper_text: "Update your first name"
-        helper_text_mode: "on_focus"
+        hint_text: "Update first name"
+        helper_text_mode: "on_error"
         pos_hint: {'center_x': 0.35, 'center_y': 0.6}
         size_hint_x: None
         width: 250
         
-    MDFillRoundFlatButton:
-        text: "Update first name"
+    MDFloatingActionButton:
+        icon: 'check-bold'
+        elevation_normal: 12
+        md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.75, 'center_y': 0.6}
-        #on_press: root.update_first_name()
+        on_press: root.update_first_name()
 
     MDTextField:
         id: last_name
-        hint_text: "Enter new last name"
-        helper_text: "Update your last name"
-        helper_text_mode: "on_focus"
+        hint_text: "Update last name"
+        helper_text_mode: "on_error"
         pos_hint: {'center_x': 0.35, 'center_y': 0.5}
         size_hint_x: None
         width: 250
         
-    MDFillRoundFlatButton:
-        text: "Update last name"
+    MDFloatingActionButton:
+        icon: 'check-bold'
+        elevation_normal: 12
+        md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.75, 'center_y': 0.5}
-        #on_press: root.update_last_name()
-        #on_press: root.get_user_id()
-
+        on_press: root.update_last_name()
+        
+    MDFillRoundFlatButton:
+        text: "Update baby info"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.4}
+        on_press: root.manager.current = 'UpdateBaby'
+        
+    MDFillRoundFlatButton:
+        text: "Logout"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.3}
+        on_press: root.manager.current = 'Login'
+        
+    MDRaisedButton:
+        text: "Delete your account"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        md_bg_color: 0.9, 0.68, 0.86, 1
+        on_press: root.show_delete_confirmation()
+        
     MDFillRoundFlatButton:
         text: "Back"
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_press: root.manager.current = 'Home'
 
+<UpdateBabyScreen>:
+    name: 'UpdateBaby'
+        
         
 <HomeScreen>:        
     name: 'Home'
+    MDLabel:
+        text: "Home"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
+        halign: "center"
+        font_style: "H6"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.85}
+        
     MDIconButton:
         icon: "account-details"
         size_hint: None, None
@@ -245,31 +294,48 @@ ScreenManager:
         pos_hint: {'center_x': 0.1, 'center_y': 0.95}
         on_press: root.manager.current = 'Account'
         elevation_normal: 12
+
+    MDLabel:
+        text: f"{root.first_name} {root.last_name}"
+        pos_hint: {'center_x': 0.35, 'center_y': 0.95}
+        halign: "center"
+        width:300
+        
     MDFillRoundFlatButton:
         text: "Sleep Tracking"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.7}
         on_press: root.manager.current = 'SleepTracking'
+        
     MDFillRoundFlatButton:
         text: "Feeding Tracking"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.6}
         on_press: root.manager.current = 'FeedingTracking'
+        
     MDFillRoundFlatButton:
         text: "Growth & Health Tracking"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         on_press: root.manager.current = 'GrowthHealthTracking'
+        
     MDFillRoundFlatButton:
         text: "Lullabies & White Noise"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-        on_press: root.manager.current = 'Lullabies'
-    MDFillRoundFlatButton:
-        text: "Video"
         pos_hint: {'center_x': 0.5, 'center_y': 0.4}
+        on_press: root.manager.current = 'Lullabies'
+        
+    MDFloatingActionButton:
+        icon: 'video-outline'
+        pos_hint: {'center_x': 0.4, 'center_y': 0.2}
+        md_bg_color: 0.9, 0.68, 0.86, 1
         on_press: root.manager.current = 'Video'
+        size: dp(150), dp(150)
+        elevation_normal: 12
+        
+        
     MDFloatingActionButton:
         icon: root.icon_audio
         size_hint: None, None
+        md_bg_color: 0.9, 0.68, 0.86, 1
         size: dp(150), dp(150) 
-        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        pos_hint: {'center_x': 0.6, 'center_y': 0.2}
         on_press: root.toggle_icon_audio()
         elevation_normal: 12
        
@@ -282,7 +348,8 @@ ScreenManager:
     MDLabel:
         text: "Sleep Tracking"
         halign: "center"
-        theme_text_color: "Secondary"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
@@ -296,6 +363,7 @@ ScreenManager:
     MDFloatingActionButton:
         icon: "plus"
         pos_hint: {'center_x': 0.5, 'center_y': 0.7}
+        md_bg_color: 0.9, 0.68, 0.86, 1
         on_press: root.manager.current = 'SleepEntry'
         
     MDFillRoundFlatButton:
@@ -318,13 +386,15 @@ ScreenManager:
     MDLabel:
         text: "Add new sleep entry"
         halign: "center"
-        theme_text_color: "Secondary"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.8}
         
     MDTextField:
         id: start_hour
         hint_text: "Start Hour"
+        helper_text_mode: "on_error"
         icon_right: "clock"
         icon_right_color: app.theme_cls.primary_color
         pos_hint: {'center_x':0.5, 'center_y':0.7}
@@ -337,6 +407,7 @@ ScreenManager:
     MDTextField:
         id: end_hour
         hint_text: "End Hour"
+        helper_text_mode: "on_error"
         icon_right: "clock"
         icon_right_color: app.theme_cls.primary_color
         pos_hint: {'center_x':0.5, 'center_y':0.6}
@@ -349,6 +420,7 @@ ScreenManager:
     MDTextField:
         id: sleep_date
         hint_text: "Date"
+        helper_text_mode: "on_error"
         icon_right: "calendar-today"
         icon_right_color: app.theme_cls.primary_color
         pos_hint: {'center_x':0.5, 'center_y':0.5}
@@ -369,8 +441,9 @@ ScreenManager:
         
     MDFloatingActionButton:
         icon: "check-bold"
+        md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.5, 'center_y': 0.3}
-        on_release: app.add_sleep_entry("", root.ids.start_hour.text, root.ids.end_hour.text, root.ids.sleep_date.text, root.ids.sleep_notes.text)
+        on_release: root.add_sleep_entry("", root.ids.start_hour.text, root.ids.end_hour.text, root.ids.sleep_date.text, root.ids.sleep_notes.text)
         
     MDFillRoundFlatButton:
         text: "Back"
@@ -385,7 +458,8 @@ ScreenManager:
     MDLabel:
         text: "Feeding Tracking"
         halign: "center"
-        theme_text_color: "Secondary"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
@@ -398,6 +472,7 @@ ScreenManager:
         
     MDFloatingActionButton:
         icon: "plus"
+        md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.5, 'center_y': 0.7}
         on_press: root.manager.current = 'FeedingEntry'
         
@@ -419,7 +494,8 @@ ScreenManager:
     MDLabel:
         text: "Add new feeding entry"
         halign: "center"
-        theme_text_color: "Secondary"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
@@ -427,6 +503,7 @@ ScreenManager:
         id: feed_hour
         hint_text: "Feed Hour"
         icon_right: "clock"
+        helper_text_mode: "on_error"
         icon_right_color: app.theme_cls.primary_color
         pos_hint: {'center_x':0.5, 'center_y':0.8}
         size_hint_x: None
@@ -438,6 +515,7 @@ ScreenManager:
     MDTextField:
         id: feed_date
         hint_text: "Date"
+        helper_text_mode: "on_error"
         icon_right: "calendar-today"
         icon_right_color: app.theme_cls.primary_color
         pos_hint: {'center_x':0.5, 'center_y':0.7}
@@ -476,8 +554,9 @@ ScreenManager:
     
     MDFloatingActionButton:
         icon: "check-bold"
+        md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
-        on_release:  app.add_food_entry("", root.ids.feed_hour.text, root.ids.feed_date.text, int(root.ids.milk_slider.value), root.ids.feed_notes.text)
+        on_release:  root.add_food_entry("", root.ids.feed_hour.text, root.ids.feed_date.text, int(root.ids.milk_slider.value), root.ids.feed_notes.text)
         
     MDFillRoundFlatButton:
         text: "Back"
@@ -492,7 +571,8 @@ ScreenManager:
     MDLabel:
         text: "Growth & Health Tracking"
         halign: "center"
-        theme_text_color: "Secondary"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
@@ -508,9 +588,10 @@ ScreenManager:
     name: 'Lullabies'    
     
     MDLabel:
-        text: "Lullabies and White Noise"
+        text: "Lullabies"
         halign: "center"
-        theme_text_color: "Secondary"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}    
     
@@ -535,14 +616,7 @@ ScreenManager:
     
 <VideoScreen>:        
     name: 'Video'
-    
-    MDLabel:
-        text: "Video"
-        halign: "center"
-        theme_text_color: "Secondary"
-        font_style: "H6"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
-        
+            
     VideoStreamWidget:
         id: video_stream
         size_hint: None, None
