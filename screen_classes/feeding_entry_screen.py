@@ -3,6 +3,8 @@ from kivymd.app import MDApp
 
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
+from kivymd.uix.menu import MDDropdownMenu
+
 
 class FeedingEntryScreen(Screen):
     def __init__(self, **kwargs):
@@ -21,15 +23,53 @@ class FeedingEntryScreen(Screen):
         app = MDApp.get_running_app()
         return app.current_user_id
 
-    def add_food_entry(self, baby_id, feed_hour, feed_date, ml, notes):
+    def clear_fields(self):
+        self.manager.get_screen('FeedingEntry').ids.baby_selector.text = ''
+        self.manager.get_screen('FeedingEntry').ids.feed_hour.text = ''
+        self.manager.get_screen('FeedingEntry').ids.feed_date.text = ''
+        self.manager.get_screen('FeedingEntry').ids.feed_notes.text = ''
+
+    def show_baby_selector(self):
+        menu_items = [{'text': f"{baby['baby_name']}", 'viewclass': 'OneLineListItem',
+                       'on_release': lambda x=f"{baby['baby_name']}": self.set_baby(x)}
+                      for baby in self.fetch_babies()]
+        self.menu = MDDropdownMenu(
+            caller=self.manager.get_screen('FeedingEntry').ids.baby_selector,
+            items=menu_items,
+            position="auto",
+        )
+        self.menu.open()
+
+    def set_baby(self, baby_name):
+        self.manager.get_screen('FeedingEntry').ids.baby_selector.text = baby_name
+        self.menu.dismiss()
+
+    def fetch_babies(self):
+        conn = sqlite3.connect('baby-v.db')
+        cursor = conn.cursor()
+        user_id = self.get_user_id()
+
+        query = "SELECT id, baby_name FROM babies WHERE user_id = ?"
+
+        try:
+            cursor.execute(query, (user_id,))
+            babies = cursor.fetchall()
+            return [{'id': baby[0], 'baby_name': baby[1]} for baby in babies]
+        except sqlite3.Error as e:
+            print(f"An error occurred while fetching babies: {e}")
+            return []
+        finally:
+            conn.close()
+
+    def add_food_entry(self, baby_id, baby_name, feed_hour, feed_date, ml, notes):
         user_id = self.get_user_id()
         app = MDApp.get_running_app()
 
-        if feed_hour and feed_date:
+        if baby_name and feed_hour and feed_date:
             conn = sqlite3.connect('baby-v.db')
             cursor = conn.cursor()
 
-            cursor.execute('''SELECT id FROM babies WHERE user_id = ? LIMIT 1''', (user_id,))
+            cursor.execute('''SELECT id FROM babies WHERE user_id = ? AND baby_name = ? LIMIT 1''', (user_id, baby_name))
             baby = cursor.fetchone()
 
             if baby is not None:
@@ -39,9 +79,16 @@ class FeedingEntryScreen(Screen):
             ?, ?)''',
                        (baby_id, feed_hour, feed_date, ml, notes))
             conn.commit()
-            conn.close()
 
+            self.manager.get_screen('FeedingEntry').ids.baby_selector.line_color_normal = app.theme_cls.primary_color
+            self.manager.get_screen('FeedingEntry').ids.feed_hour.line_color_normal = app.theme_cls.primary_color
+            self.manager.get_screen('FeedingEntry').ids.feed_date.line_color_normal = app.theme_cls.primary_color
+
+            conn.close()
+        if not baby_name:
+            self.manager.get_screen('FeedingEntry').ids.baby_selector.line_color_normal = app.theme_cls.error_color
         if not feed_hour:
             self.manager.get_screen('FeedingEntry').ids.feed_hour.line_color_normal = app.theme_cls.error_color
         if not feed_date:
             self.manager.get_screen('FeedingEntry').ids.feed_date.line_color_normal = app.theme_cls.error_color
+        self.clear_fields()

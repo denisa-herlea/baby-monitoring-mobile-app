@@ -12,6 +12,7 @@ class AccountScreen(Screen):
     icon_lights = StringProperty('string-lights-off')
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
         with self.canvas.before:
             Color(255 / 255.0, 255 / 255.0, 255 / 255.0, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)
@@ -37,18 +38,34 @@ class AccountScreen(Screen):
 
     def update_last_name(self):
         user_id = self.get_user_id()
+        app = MDApp.get_running_app()
         last_name = self.ids.last_name.text
-        self.update_user_last_name(user_id, last_name)
+        if last_name == "":
+            self.manager.get_screen('Account').ids.last_name.line_color_normal = app.theme_cls.error_color
+        else:
+            self.manager.get_screen('Account').ids.last_name.line_color_normal = app.theme_cls.primary_color
+            self.update_user_last_name(user_id, last_name)
 
     def update_first_name(self):
         user_id = self.get_user_id()
+        app = MDApp.get_running_app()
         first_name = self.ids.first_name.text
-        self.update_user_first_name(user_id, first_name)
+        if first_name == "":
+            self.manager.get_screen('Account').ids.first_name.line_color_normal = app.theme_cls.error_color
+        else:
+            self.manager.get_screen('Account').ids.first_name.line_color_normal = app.theme_cls.primary_color
+            self.update_user_first_name(user_id, first_name)
+
 
     def update_password(self):
         user_id = self.get_user_id()
+        app = MDApp.get_running_app()
         password = self.ids.password.text
-        self.update_user_password(user_id, password)
+        if password == "":
+            self.manager.get_screen('Account').ids.password.line_color_normal = app.theme_cls.error_color
+        else:
+            self.manager.get_screen('Account').ids.password.line_color_normal = app.theme_cls.primary_color
+            self.update_user_last_name(user_id, password)
 
     def update_user_last_name(self, user_id, last_name):
         conn = sqlite3.connect('baby-v.db')
@@ -64,7 +81,7 @@ class AccountScreen(Screen):
             print("An error occurred:", e)
         finally:
             conn.close()
-
+        self.manager.get_screen('Account').ids.last_name.text = ''
         self.manager.current = 'Account'
 
     def update_user_first_name(self, user_id, first_name):
@@ -80,7 +97,7 @@ class AccountScreen(Screen):
             print("An error occurred:", e)
         finally:
             conn.close()
-
+        self.manager.get_screen('Account').ids.first_name.text = ''
         self.manager.current = 'Account'
 
     def update_user_password(self, user_id, password):
@@ -96,6 +113,7 @@ class AccountScreen(Screen):
             print("An error occurred:", e)
         finally:
             conn.close()
+        self.manager.get_screen('Account').ids.password.text = ''
         self.manager.current = 'Account'
 
     def show_success_dialog_first_name(self):

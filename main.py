@@ -33,7 +33,7 @@ from screen_classes.video_screen import VideoScreen
 from screen_classes.sleep_entry_screen import SleepEntryScreen
 from screen_classes.feeding_entry_screen import FeedingEntryScreen
 from screen_classes.account_screen import AccountScreen
-from screen_classes.update_baby_screen import UpdateBabyScreen
+from screen_classes.baby_updates import UpdateBabyScreen,ChooseBabyScreen
 
 sm = ScreenManager()
 sm.add_widget(LoginScreen(name='Login'))
@@ -49,7 +49,7 @@ sm.add_widget(SleepEntryScreen(name='SleepEntry'))
 sm.add_widget(FeedingEntryScreen(name='FeedingEntry'))
 sm.add_widget(AccountScreen(name='Account'))
 sm.add_widget(UpdateBabyScreen(name='UpdateBaby'))
-
+sm.add_widget(ChooseBabyScreen(name='ChooseBaby'))
 
 class VideoStreamWidget(Image):
     def start_stream(self, url):
@@ -223,6 +223,8 @@ class DemoApp(MDApp):
         if result:
             user_id, stored_password = result
             if password == stored_password:
+                self.root.get_screen('Login').ids.login_username.line_color_normal = self.theme_cls.primary_color
+                self.root.get_screen('Login').ids.login_password.line_color_normal = self.theme_cls.primary_color
                 self.current_user_id = user_id
                 self.root.current = 'Home'
             else:
@@ -231,17 +233,30 @@ class DemoApp(MDApp):
             err = True
 
         if err:
-            self.dialog = MDDialog(
-                title="Error",
-                text="Incorect username or password!",
-                buttons=[
-                    MDFlatButton(
-                        text="Try again",
-                        on_release=self.close_dialog_to_login
-                    )
-                ]
-            )
-            self.dialog.open()
+            if username and password:
+                self.root.get_screen('Login').ids.login_username.line_color_normal = self.theme_cls.error_color
+                self.root.get_screen('Login').ids.login_password.line_color_normal = self.theme_cls.error_color
+                self.dialog = MDDialog(
+                    title="Error",
+                    text="Incorect username or password!",
+                    buttons=[
+                        MDFlatButton(
+                            text="Try again",
+                            on_release=self.close_dialog_to_login
+                        )
+                    ]
+                )
+                self.dialog.open()
+            elif not username and not password:
+                self.root.get_screen('Login').ids.login_username.line_color_normal = self.theme_cls.error_color
+                self.root.get_screen('Login').ids.login_password.line_color_normal = self.theme_cls.error_color
+            elif not username:
+                self.root.get_screen('Login').ids.login_username.line_color_normal = self.theme_cls.error_color
+                self.root.get_screen('Login').ids.login_password.line_color_normal = self.theme_cls.primary_color
+            elif not password:
+                self.root.get_screen('Login').ids.login_password.line_color_normal = self.theme_cls.error_color
+                self.root.get_screen('Login').ids.login_username.line_color_normal = self.theme_cls.primary_color
+
         conn.close()
 
 DemoApp().run()

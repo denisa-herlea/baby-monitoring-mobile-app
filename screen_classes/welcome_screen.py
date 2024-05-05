@@ -47,13 +47,25 @@ class WelcomeScreen(Screen):
             user_id = self.get_user_id()
             conn = sqlite3.connect('baby-v.db')
             c = conn.cursor()
-            c.execute('''
+
+            try:
+                c.execute('SELECT id FROM babies WHERE baby_name = ? AND user_id = ?', (baby_name, user_id))
+                existing_baby = c.fetchone()
+
+                if existing_baby:
+                    self.manager.get_screen('Welcome').ids.baby_name.line_color_normal = app.theme_cls.error_color
+                    self.manager.get_screen('Welcome').ids.baby_name.helper_text = "Baby was already registered"
+                    return
+                c.execute('''
                     INSERT INTO babies (user_id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height)
                     VALUES (?, ?, ?, ?, ?, ?)
                 ''', (user_id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height))
-            conn.commit()
-            conn.close()
-            self.show_success_dialog_add_baby()
+                conn.commit()
+                self.manager.get_screen('Welcome').ids.baby_name.line_color_normal = app.theme_cls.primary_color
+                self.manager.get_screen('Welcome').ids.baby_name.helper_text = ''
+                self.show_success_dialog_add_baby()
+            finally:
+                conn.close()
         else:
             self.manager.get_screen('Welcome').ids.baby_name.line_color_normal = app.theme_cls.error_color
 
