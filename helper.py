@@ -15,6 +15,10 @@ ScreenManager:
     AccountScreen:
     ChooseBabyScreen:
     UpdateBabyScreen:
+    AddNewBabyScreen:
+    SleepRecScreen:
+    LogMeasurementScreen:
+    VaccinesScreen:
 
 <LoginScreen>:
     name: 'Login'
@@ -209,12 +213,6 @@ ScreenManager:
         text_color: 0.9, 0.68, 0.86, 1
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
-        
-    MDIconButton:
-        icon: root.icon_lights
-        elevation_normal: 12
-        pos_hint: {'center_x': 0.9, 'center_y': 0.9}
-        on_press: root.toggle_icon_lights()
 
     MDTextField:
         id: password
@@ -281,6 +279,84 @@ ScreenManager:
         text: "Back"
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_press: root.manager.current = 'Home'
+        
+<AddNewBabyScreen>:
+    name: 'AddNewBaby'
+    MDLabel:
+        text: "Add new baby"
+        halign: "center"
+        theme_text_color: "Custom"
+        text_color: 0, 0, 0, 1
+        font_style: "H5"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+          
+    MDTextField:
+        id: baby_name
+        hint_text: "Baby Name"
+        helper_text_mode: "on_error"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.75}
+        size_hint_x: None
+        width:300
+        mode: "rectangle"
+        
+    MDTextField:
+        id: date_of_birth
+        hint_text: "Date of birth"
+        icon_right: "calendar-today"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.65}
+        size_hint_x: None
+        width: 300
+        mode: "rectangle"
+        on_focus: if self.focus: app.show_date_picker(5)
+        readonly: True
+        
+    MDTextField:
+        id: hour_of_birth
+        hint_text: "Hour of birth"
+        icon_right: "clock"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.55}
+        size_hint_x: None
+        width: 300
+        mode: "rectangle"
+        on_focus: if self.focus: app.show_time_picker_add_baby()
+        readonly: True
+        
+    MDTextField:
+        id: birth_weight
+        hint_text: "Weight at birth (kg)"
+        icon_right: "baby-carriage"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.45}
+        size_hint_x: None
+        width: 300
+        input_type: 'number'
+        mode: "rectangle"
+        
+    MDTextField:
+        id: birth_height
+        hint_text: "Height at birth (cm)"
+        icon_right: "human-male-height"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.35}
+        size_hint_x: None
+        width: 300
+        input_type: 'number'
+        mode: "rectangle"
+        
+    MDFloatingActionButton:
+        icon: 'check-bold'
+        elevation_normal: 12
+        md_bg_color: 0.9, 0.68, 0.86, 1
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        on_release: root.save_baby_details(root.ids.baby_name.text, root.ids.date_of_birth.text, root.ids.hour_of_birth.text, root.ids.birth_weight.text, root.ids.birth_height.text)
+        
+    MDFillRoundFlatButton:
+        text: "Back"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        on_press: root.manager.current = 'ChooseBaby'
 
 <ChooseBabyScreen>:
     name: 'ChooseBaby'
@@ -297,7 +373,7 @@ ScreenManager:
         icon: "plus"
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         md_bg_color: 0.9, 0.68, 0.86, 1
-        on_press: root.manager.current = 'Welcome'
+        on_press: root.manager.current = 'AddNewBaby'
     
     MDFillRoundFlatButton:
         text: "Back"
@@ -313,7 +389,7 @@ ScreenManager:
         text_color: 0.9, 0.68, 0.86, 1
         halign: "center"
         font_style: "H6"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.85}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.95}
     
     MDTextField:
         id: baby_name
@@ -329,7 +405,7 @@ ScreenManager:
         icon: 'check-bold'
         elevation_normal: 12
         md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.75, 'center_y': 0.5}
+        pos_hint: {'center_x': 0.80, 'center_y': 0.75}
         on_press: root.update_baby_name(root.ids.baby_name.text)
         
     MDTextField:
@@ -341,14 +417,14 @@ ScreenManager:
         size_hint_x: None
         width: 300
         mode: "rectangle"
-        on_focus: if self.focus: app.show_date_picker(1)
+        on_focus: if self.focus: app.show_date_picker(4)
         readonly: True
         
     MDFloatingActionButton:
         icon: 'check-bold'
         elevation_normal: 12
         md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.75, 'center_y': 0.5}
+        pos_hint: {'center_x': 0.80, 'center_y': 0.65}
         on_press: root.update_date_of_birth(root.ids.date_of_birth.text)
         
     MDTextField:
@@ -360,14 +436,14 @@ ScreenManager:
         size_hint_x: None
         width: 300
         mode: "rectangle"
-        on_focus: if self.focus: app.show_time_picker()
+        on_focus: if self.focus: app.show_time_picker_for_update_baby()
         readonly: True
         
     MDFloatingActionButton:
         icon: 'check-bold'
         elevation_normal: 12
         md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.75, 'center_y': 0.5}
+        pos_hint: {'center_x': 0.80, 'center_y': 0.55}
         on_press: root.update_hour_of_birth(root.ids.hour_of_birth.text)
         
     MDTextField:
@@ -385,7 +461,7 @@ ScreenManager:
         icon: 'check-bold'
         elevation_normal: 12
         md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.75, 'center_y': 0.5}
+        pos_hint: {'center_x': 0.80, 'center_y': 0.45}
         on_press: root.update_birth_weight(root.ids.birth_weight.text)
         
     MDTextField:
@@ -403,7 +479,7 @@ ScreenManager:
         icon: 'check-bold'
         elevation_normal: 12
         md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.75, 'center_y': 0.5}
+        pos_hint: {'center_x': 0.80, 'center_y': 0.35}
         on_press: root.update_birth_height(root.ids.birth_height.text)
     
     MDFillRoundFlatButton:
@@ -452,7 +528,7 @@ ScreenManager:
         on_press: root.manager.current = 'GrowthHealthTracking'
         
     MDFillRoundFlatButton:
-        text: "Lullabies & White Noise"
+        text: "Lullabies"
         pos_hint: {'center_x': 0.5, 'center_y': 0.4}
         on_press: root.manager.current = 'Lullabies'
         
@@ -488,33 +564,47 @@ ScreenManager:
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
-    MDLabel:
-        text: 'Baby ... has slept today ... hours!'
-        halign: "center"
-        theme_text_color: "Secondary"
-        font_style: "H6"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        ScrollView:
         
-    MDFloatingActionButton:
-        icon: "plus"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-        md_bg_color: 0.9, 0.68, 0.86, 1
-        on_press: root.manager.current = 'SleepEntry'
-        
-    MDFillRoundFlatButton:
-        text: "Sleep History"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.4}
-        on_release: root.plot_sleep_chart_call()
-        #on_release: root.create_sleep_chart()
+            MDList:
+                OneLineIconListItem:
+                    text: "Log New Sleep Entry"
+                    on_press: root.manager.current = 'SleepEntry'
+                    IconLeftWidget:
+                        icon: 'plus'
+
+                OneLineIconListItem:
+                    text: "View Sleep Chart"
+                    #on_press: root.plot_sleep_chart_call()
+                    IconLeftWidget:
+                        icon: 'chart-bell-curve'
+                        
+                OneLineIconListItem:
+                    text: "Recommended Hours of Sleep"
+                    on_press: root.manager.current = 'SleepRec'
+                    IconLeftWidget:
+                        icon: 'sleep'
         
     MDFillRoundFlatButton:
         text: "Back"
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+
+
+<SleepRecScreen>:
+    name: 'SleepRec'
+    BoxLayout:
+        orientation: 'vertical'
+    
+                    
+    MDFillRoundFlatButton:
+        text: "Back"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        on_press: root.manager.current = 'SleepTracking'
         
-    
-    
-    
 <SleepEntryScreen>:        
     name: 'SleepEntry'
     
@@ -611,23 +701,23 @@ ScreenManager:
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
-    MDLabel:
-        text: "Baby ... has ate today ... times!"
-        halign: "center"
-        theme_text_color: "Secondary"
-        font_style: "H6"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        ScrollView:
         
-    MDFloatingActionButton:
-        icon: "plus"
-        md_bg_color: 0.9, 0.68, 0.86, 1
-        pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-        on_press: root.manager.current = 'FeedingEntry'
-        
-    MDFillRoundFlatButton:
-        text: "Feeding History"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.4}
-        #on_release: root.plot_sleep_chart_call()
+            MDList:
+                OneLineIconListItem:
+                    text: "Log New Feed Entry"
+                    on_press: root.manager.current = 'FeedingEntry'
+                    IconLeftWidget:
+                        icon: 'plus'
+
+                OneLineIconListItem:
+                    text: "View Feeding Chart"
+                    #on_press: root.plot_sleep_chart_call()
+                    IconLeftWidget:
+                        icon: 'chart-line'
         
     MDFillRoundFlatButton:
         text: "Back"
@@ -738,12 +828,127 @@ ScreenManager:
         font_style: "H6"
         pos_hint: {'center_x': 0.5, 'center_y': 0.9}
         
+    BoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        ScrollView:
+
+            MDList:
+                OneLineIconListItem:
+                    text: "Log New Measurement"
+                    on_press: root.manager.current = 'LogMeasurement'
+                    IconLeftWidget:
+                        icon: 'plus'
+
+                OneLineIconListItem:
+                    text: "Vaccination Tracker"
+                    on_press: root.manager.current = 'Vaccines'
+                    IconLeftWidget:
+                        icon: 'needle'
+
+                OneLineIconListItem:
+                    text: "View Growth Chart"
+                    #on_press: root.show_growth_chart()
+                    IconLeftWidget:
+                        icon: 'chart-line'
+         
+    MDFillRoundFlatButton:
+        text: "Back"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        on_press: root.manager.current = 'Home'
+
+
+<LogMeasurementScreen>:
+    name: 'LogMeasurement'
+
+    MDLabel:
+        text: "Add new measurement"
+        halign: "center"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
+        font_style: "H6"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+        
+    MDTextField:
+        id: baby_selector
+        hint_text: "Baby"
+        readonly: True
+        helper_text_mode: "on_error"
+        icon_right: "baby"
+        mode: "rectangle"
+        width: 300
+        size_hint_x: None
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x': 0.5, 'center_y': 0.75}
+        on_focus: if self.focus: root.show_baby_selector()
+        
+    MDTextField:
+        id: measurement_date
+        hint_text: "Date"
+        helper_text_mode: "on_error"
+        icon_right: "calendar-today"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.65}
+        size_hint_x: None
+        width: 300
+        mode: "rectangle"
+        on_focus: if self.focus: app.show_date_picker(6)
+        readonly: True
+        
+    MDTextField:
+        id: height_field
+        hint_text: 'Enter height (cm)'
+        icon_right: 'human-male-height'
+        helper_text_mode: "on_error"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.55}
+        size_hint_x: None
+        width: 300
+        mode: "rectangle"
+
+    MDTextField:
+        id: weight_field
+        helper_text_mode: "on_error"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.45}
+        size_hint_x: None
+        width: 300
+        mode: "rectangle"
+        hint_text: 'Enter weight (kg)'
+        icon_right: 'weight-kilogram'
+
+    MDTextField:
+        id: head_circ_field
+        hint_text: 'Head circ. (cm)'
+        icon_right: 'tape-measure'
+        helper_text_mode: "on_error"
+        icon_right_color: app.theme_cls.primary_color
+        pos_hint: {'center_x':0.5, 'center_y':0.35}
+        size_hint_x: None
+        width: 300
+        mode: "rectangle"
+
+    MDFloatingActionButton:
+        icon: 'check-bold'
+        elevation_normal: 12
+        md_bg_color: 0.9, 0.68, 0.86, 1
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+        on_release: root.save_measurement("",root.ids.baby_selector.text, root.ids.measurement_date.text, root.ids.height_field.text, root.ids.weight_field.text, root.ids.head_circ_field.text)
         
     MDFillRoundFlatButton:
         text: "Back"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.3}
-        on_press: root.manager.current = 'Home'
-
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        on_press: root.manager.current = 'GrowthHealthTracking'
+        
+<VaccinesScreen>:
+    name: 'Vaccines'
+    BoxLayout:
+        orientation: 'vertical' 
+                    
+    MDFillRoundFlatButton:
+        text: "Back"
+        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        on_press: root.manager.current = 'GrowthHealthTracking'
 
 
 <LullabiesScreen>:        
@@ -771,8 +976,17 @@ ScreenManager:
 
     MDFillRoundFlatButton:
         text: "Back"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        pos_hint: {'center_x': 0.4, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        
+    MDFloatingActionButton:
+        icon: "stop"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        md_bg_color: 1, 0, 0, 1
+        pos_hint: {'center_x': 0.6, 'center_y': 0.1}
+        on_press: root.pause_audio()
+        elevation_normal: 12
         
  
     
@@ -797,4 +1011,5 @@ ScreenManager:
         text: "Back"
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        
 """

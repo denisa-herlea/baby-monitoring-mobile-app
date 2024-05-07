@@ -3,6 +3,8 @@ import sqlite3
 from kivymd.app import MDApp
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
+from kivymd.uix.button import MDFlatButton
+from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import OneLineListItem
 
 
@@ -31,12 +33,13 @@ class ChooseBabyScreen(Screen):
         cursor = conn.cursor()
         user_id = self.get_user_id()
 
-        query = "SELECT id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height  FROM babies WHERE user_id = ?"
+        query = ("SELECT id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height  FROM babies WHERE user_id = ?")
 
         try:
             cursor.execute(query, (user_id,))
             babies = cursor.fetchall()
-            return [{'id': baby[0], 'baby_name': baby[1], 'date_of_birth':baby[2], 'hour_of_birth':baby[3], 'birth_weight':baby[4], 'birth_height':baby[5]} for baby in babies]
+            return [{'id': baby[0], 'baby_name': baby[1], 'date_of_birth': baby[2], 'hour_of_birth': baby[3],
+                     'birth_weight': baby[4], 'birth_height': baby[5]} for baby in babies]
         except sqlite3.Error as e:
             print(f"Error fetching babies: {e}")
             return []
@@ -58,11 +61,12 @@ class ChooseBabyScreen(Screen):
 
     def select_baby(self, baby):
         self.manager.current = 'UpdateBaby'
-        self.manager.get_screen('UpdateBaby').return_baby_id(baby)
         self.manager.get_screen('UpdateBaby').set_baby_data(baby)
 
 
 class UpdateBabyScreen(Screen):
+    baby_id = None
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         with self.canvas.before:
@@ -76,14 +80,15 @@ class UpdateBabyScreen(Screen):
         self.rect.pos = self.pos
 
     def set_baby_data(self, baby):
+        self.baby_id = baby['id']
         self.ids.baby_name.text = baby['baby_name']
         self.ids.date_of_birth.text = baby['date_of_birth']
         self.ids.hour_of_birth.text = baby['hour_of_birth']
         self.ids.birth_weight.text = str(baby['birth_weight'])
         self.ids.birth_height.text = str(baby['birth_height'])
 
-    def return_baby_id(self, baby):
-        return baby[0]
+    def return_baby_id(self):
+        return self.baby_id
 
     def update_baby_name(self, new_name):
         baby_id = self.return_baby_id()
@@ -169,3 +174,87 @@ class UpdateBabyScreen(Screen):
             self.show_error_dialog(f"Database error: {e}")
         finally:
             conn.close()
+
+    def show_success_dialog(self, text):
+        dialog = MDDialog(
+            text=text,
+            buttons=[
+                MDFlatButton(
+                    text="OK",
+                    on_release=lambda x: self.dismiss_dialog(dialog)
+                )
+            ]
+        )
+        dialog.open()
+
+    def dismiss_dialog(self, dialog):
+        dialog.dismiss()
+
+
+class AddNewBabyScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        with self.canvas.before:
+            Color(255 / 255.0, 255 / 255.0, 255 / 255.0, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+
+        self.bind(size=self._update_rect, pos=self._update_rect)
+
+    def _update_rect(self, instance, value):
+        self.rect.size = self.size
+        self.rect.pos = self.pos
+
+    def get_user_id(self):
+        app = MDApp.get_running_app()
+        return app.current_user_id
+
+    def clear_baby_fields(self):
+        self.manager.get_screen('AddNewBaby').ids.baby_name.text = ''
+        self.manager.get_screen('AddNewBaby').ids.date_of_birth.text = ''
+        self.manager.get_screen('AddNewBaby').ids.hour_of_birth.text = ''
+        self.manager.get_screen('AddNewBaby').ids.birth_weight.text = ''
+        self.manager.get_screen('AddNewBaby').ids.birth_height.text = ''
+
+    def save_baby_details(self, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height):
+        app = MDApp.get_running_app()
+        if baby_name:
+            user_id = self.get_user_id()
+            conn = sqlite3.connect('baby-v.db')
+            c = conn.cursor()
+
+            try:
+                c.execute('SELECT id FROM babies WHERE baby_name = ? AND user_id = ?', (baby_name, user_id))
+                existing_baby = c.fetchone()
+
+                if existing_baby:
+                    self.manager.get_screen('AddNewBaby').ids.baby_name.line_color_normal = app.theme_cls.error_color
+                    self.manager.get_screen('AddNewBaby').ids.baby_name.helper_text = "Baby was already registered"
+                    return
+                c.execute('''
+                    INSERT INTO babies (user_id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (user_id, baby_name, date_of_birth, hour_of_birth, birth_weight, birth_height))
+                conn.commit()
+                self.manager.get_screen('AddNewBaby').ids.baby_name.line_color_normal = app.theme_cls.primary_color
+                self.manager.get_screen('AddNewBaby').ids.baby_name.helper_text = ''
+                self.show_success_dialog_add_baby()
+            finally:
+                conn.close()
+        else:
+            self.manager.get_screen('AddNewBaby').ids.baby_name.line_color_normal = app.theme_cls.error_color
+
+    def show_success_dialog_add_baby(self):
+        dialog = MDDialog(
+            text="Baby was successfully added!",
+            buttons=[
+                MDFlatButton(
+                    text="OK",
+                    on_release=lambda x: (self.dismiss_dialog(dialog))
+                )
+            ]
+        )
+        dialog.open()
+
+    def dismiss_dialog(self, dialog):
+        self.clear_baby_fields()
+        dialog.dismiss()

@@ -3,6 +3,18 @@ import sqlite3
 conn = sqlite3.connect('baby-v.db')
 cursor = conn.cursor()
 
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS measurement_entries (
+    id INTEGER PRIMARY KEY,
+    baby_id INTEGER,
+    measurement_date DATE,
+    height REAL,
+    weight REAL,
+    head_circ REAL,
+    FOREIGN KEY(baby_id) REFERENCES babies(id)
+)
+''')
+
 """
 cursor.execute('''
     DROP TABLE users
@@ -19,7 +31,7 @@ cursor.execute('''
 cursor.execute('''
     DROP TABLE food_entries
 ''')
-"""
+
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS users (
@@ -68,6 +80,6 @@ cursor.execute('''
 )
 ''')
 
-
+"""
 conn.commit()
 conn.close()

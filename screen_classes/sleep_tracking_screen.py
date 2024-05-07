@@ -1,9 +1,11 @@
+from kivy.metrics import dp
 from kivy_garden.graph import Graph, MeshLinePlot
 import sqlite3
 from datetime import datetime, timedelta
 
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
+from kivymd.uix.datatables import MDDataTable
 
 
 def calculate_sleep_durations(baby_id, week_start_date):
@@ -42,7 +44,6 @@ def calculate_sleep_durations(baby_id, week_start_date):
 
 
 class SleepTrackingScreen(Screen):
-    baby_name = 'Anna'
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         with self.canvas.before:
@@ -78,3 +79,41 @@ class SleepTrackingScreen(Screen):
     def create_sleep_chart(self):
         day_sleep, night_sleep = calculate_sleep_durations(1, datetime(2024, 4, 1))
         self.add_sleep_chart(day_sleep, night_sleep)
+
+
+class SleepRecScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        with self.canvas.before:
+            Color(255 / 255.0, 255 / 255.0, 255 / 255.0, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+
+        self.bind(size=self._update_rect, pos=self._update_rect)
+
+    def _update_rect(self, instance, value):
+        self.rect.size = self.size
+        self.rect.pos = self.pos
+
+    def on_enter(self):
+        self.data_table = MDDataTable(
+            pos_hint={'center_x': 0.5, 'center_y': 0.55},
+            size_hint=(0.9, 0.8),
+            rows_num = 9,
+            column_data=[
+                ("Age Group", dp(30)),
+                ("Recommended Sleep", dp(30))
+            ],
+            row_data=[
+                ("Babies (<4 months)", "16+ hours"),
+                ("Infants (4-12 months)", "12-16 hours"),
+                ("Toddlers (1-2 years)", "11-14 hours"),
+                ("Children (3-5 years)", "10-13 hours"),
+                ("Children (6-13 years)", "9-11 hours"),
+                ("Teenagers (14-17 years)", "8-10 hours"),
+                ("Young Adults (18-25 years)", "7-9 hours"),
+                ("Adults (26-64 years)", "7-9 hours"),
+                ("Seniors (65+ years)", "7-8 hours")
+            ]
+        )
+
+        self.add_widget(self.data_table)

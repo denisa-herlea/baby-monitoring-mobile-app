@@ -26,14 +26,14 @@ from screen_classes.login_screen import LoginScreen
 from screen_classes.register_screen import RegisterScreen
 from screen_classes.welcome_screen import WelcomeScreen
 from screen_classes.home_screen import HomeScreen
-from screen_classes.sleep_tracking_screen import SleepTrackingScreen
+from screen_classes.sleep_tracking_screen import SleepTrackingScreen, SleepRecScreen
 from screen_classes.feeding_tracking_screen import FeedingTrackingScreen
-from screen_classes.growth_health_tracking_screen import GrowthHealthTrackingScreen
+from screen_classes.growth_health_tracking_screen import GrowthHealthTrackingScreen, LogMeasurementScreen, VaccinesScreen
 from screen_classes.video_screen import VideoScreen
 from screen_classes.sleep_entry_screen import SleepEntryScreen
 from screen_classes.feeding_entry_screen import FeedingEntryScreen
 from screen_classes.account_screen import AccountScreen
-from screen_classes.baby_updates import UpdateBabyScreen,ChooseBabyScreen
+from screen_classes.baby_updates import UpdateBabyScreen, ChooseBabyScreen, AddNewBabyScreen
 
 sm = ScreenManager()
 sm.add_widget(LoginScreen(name='Login'))
@@ -42,7 +42,10 @@ sm.add_widget(WelcomeScreen(name='Welcome'))
 sm.add_widget(HomeScreen(name='Home'))
 sm.add_widget(FeedingTrackingScreen(name='FeedingTracking'))
 sm.add_widget(SleepTrackingScreen(name='SleepTracking'))
+sm.add_widget(SleepRecScreen(name='SleepRec'))
 sm.add_widget(GrowthHealthTrackingScreen(name='GrowthHealthTracking'))
+sm.add_widget(LogMeasurementScreen(name='LogMeasurement'))
+sm.add_widget(VaccinesScreen(name='Vaccines'))
 sm.add_widget(LullabiesScreen(name='Lullabies'))
 sm.add_widget(VideoScreen(name='Video'))
 sm.add_widget(SleepEntryScreen(name='SleepEntry'))
@@ -50,6 +53,7 @@ sm.add_widget(FeedingEntryScreen(name='FeedingEntry'))
 sm.add_widget(AccountScreen(name='Account'))
 sm.add_widget(UpdateBabyScreen(name='UpdateBaby'))
 sm.add_widget(ChooseBabyScreen(name='ChooseBaby'))
+sm.add_widget(AddNewBabyScreen(name='AddNewBaby'))
 
 class VideoStreamWidget(Image):
     def start_stream(self, url):
@@ -108,11 +112,25 @@ class DemoApp(MDApp):
             date_dialog.bind(on_save=self.on_date_save_sleep, on_cancel=self.on_date_cancel)
         elif var == 3:
             date_dialog.bind(on_save=self.on_date_save_feed, on_cancel=self.on_date_cancel)
+        elif var == 4:
+            date_dialog.bind(on_save=self.on_date_save_update_baby, on_cancel=self.on_date_cancel)
+        elif var == 5:
+            date_dialog.bind(on_save=self.on_date_add_baby, on_cancel=self.on_date_cancel)
+        elif var == 6:
+            date_dialog.bind(on_save=self.on_date_add_measurement, on_cancel=self.on_date_cancel)
         date_dialog.open()
 
     def on_date_save_welcome(self, instance, value, date_range):
         formatted_date = value.strftime('%Y-%m-%d')
         self.root.get_screen('Welcome').ids.date_of_birth.text = formatted_date
+
+    def on_date_add_measurement(self, instance, value, date_range):
+        formatted_date = value.strftime('%Y-%m-%d')
+        self.root.get_screen('LogMeasurement').ids.measurement_date.text = formatted_date
+
+    def on_date_add_baby(self, instance, value, date_range):
+        formatted_date = value.strftime('%Y-%m-%d')
+        self.root.get_screen('AddNewBaby').ids.date_of_birth.text = formatted_date
 
     def on_date_save_sleep(self, instance, value, date_range):
         formatted_date = value.strftime('%Y-%m-%d')
@@ -121,6 +139,10 @@ class DemoApp(MDApp):
     def on_date_save_feed(self, instance, value, date_range):
         formatted_date = value.strftime('%Y-%m-%d')
         self.root.get_screen('FeedingEntry').ids.feed_date.text = formatted_date
+
+    def on_date_save_update_baby(self, instance, value, date_range):
+        formatted_date = value.strftime('%Y-%m-%d')
+        self.root.get_screen('UpdateBaby').ids.date_of_birth.text = formatted_date
 
     def on_date_cancel(self, instance, value):
         pass
@@ -144,6 +166,26 @@ class DemoApp(MDApp):
         else:
             time_dialog.bind(time=self.on_time_save_end_hour)
         time_dialog.open()
+
+    def show_time_picker_for_update_baby(self):
+        time_dialog = MDTimePicker()
+        time_dialog.set_time(datetime.now())
+        time_dialog.bind(time=self.on_time_save_update_baby)
+        time_dialog.open()
+
+    def show_time_picker_add_baby(self):
+        time_dialog = MDTimePicker()
+        time_dialog.set_time(datetime.now())
+        time_dialog.bind(time=self.on_time_add_baby)
+        time_dialog.open()
+
+    def on_time_save_update_baby(self, instance, time):
+        formatted_time = time.strftime('%H:%M')
+        self.root.get_screen('UpdateBaby').ids.hour_of_birth.text = formatted_time
+
+    def on_time_add_baby(self, instance, time):
+        formatted_time = time.strftime('%H:%M')
+        self.root.get_screen('AddNewBaby').ids.hour_of_birth.text = formatted_time
 
     def on_time_save_start_hour(self, instance, time):
         formatted_time = time.strftime('%H:%M')

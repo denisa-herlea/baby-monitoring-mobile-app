@@ -23,15 +23,6 @@ class AccountScreen(Screen):
         self.rect.size = self.size
         self.rect.pos = self.pos
 
-    def toggle_icon_lights(self):
-        app = MDApp.get_running_app()
-        if self.icon_lights == 'string-lights-off':
-            self.icon_lights = 'string-lights'
-            app.theme_cls.theme_style = "Dark"
-        else:
-            self.icon_lights = 'string-lights-off'
-            app.theme_cls.theme_style = "Light"
-
     def get_user_id(self):
         app = MDApp.get_running_app()
         return app.current_user_id
@@ -76,7 +67,7 @@ class AccountScreen(Screen):
                 UPDATE users SET last_name = ? WHERE id = ?
             ''', (last_name, user_id))
             conn.commit()
-            self.show_success_dialog_last_name()
+            self.show_success_dialog("Last name was successfully updated!")
         except Exception as e:
             print("An error occurred:", e)
         finally:
@@ -92,7 +83,7 @@ class AccountScreen(Screen):
                 UPDATE users SET first_name = ? WHERE id = ?
             ''', ( first_name, user_id))
             conn.commit()
-            self.show_success_dialog_first_name()
+            self.show_success_dialog("First name was successfully updated!")
         except Exception as e:
             print("An error occurred:", e)
         finally:
@@ -108,7 +99,7 @@ class AccountScreen(Screen):
                 UPDATE users SET password = ? WHERE id = ?
             ''', ( password, user_id))
             conn.commit()
-            self.show_success_dialog_password()
+            self.show_success_dialog("Password was successfully updated!")
         except Exception as e:
             print("An error occurred:", e)
         finally:
@@ -116,33 +107,9 @@ class AccountScreen(Screen):
         self.manager.get_screen('Account').ids.password.text = ''
         self.manager.current = 'Account'
 
-    def show_success_dialog_first_name(self):
+    def show_success_dialog(self, text):
         dialog = MDDialog(
-            text="First name was successfully updated!",
-            buttons=[
-                MDFlatButton(
-                    text="OK",
-                    on_release=lambda x: self.dismiss_dialog(dialog)
-                )
-            ]
-        )
-        dialog.open()
-
-    def show_success_dialog_last_name(self):
-        dialog = MDDialog(
-            text="Last name was successfully updated!",
-            buttons=[
-                MDFlatButton(
-                    text="OK",
-                    on_release=lambda x: self.dismiss_dialog(dialog)
-                )
-            ]
-        )
-        dialog.open()
-
-    def show_success_dialog_password(self):
-        dialog = MDDialog(
-            text="Password was successfully updated!",
+            text=text,
             buttons=[
                 MDFlatButton(
                     text="OK",

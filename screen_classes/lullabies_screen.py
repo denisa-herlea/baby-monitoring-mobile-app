@@ -8,33 +8,6 @@ from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
 
-
-def play_audio(screen, var, btn):
-    if screen.currently_playing:
-        screen.currently_playing.stop()
-
-    audio_paths = {
-        1: 'lullabies/Lullaby1.mp3',
-        2: 'lullabies/Lullaby2.mp3',
-        3: 'lullabies/Lullaby3.mp3',
-        4: 'lullabies/Lullaby4.mp3',
-        5: 'lullabies/Lullaby5.mp3',
-        6: 'lullabies/Lullaby6.mp3',
-        7: 'lullabies/Lullaby7.mp3',
-        8: 'lullabies/Lullaby8.mp3',
-        9: 'lullabies/Lullaby9.mp3',
-        10: 'lullabies/Lullaby10.mp3',
-    }
-    audio_path = audio_paths.get(var, 'lullabies/Default.mp3')
-
-    screen.currently_playing = SoundLoader.load(audio_path)
-    if screen.currently_playing:
-        screen.currently_playing.play()
-        btn.icon = "pause-circle-outline"
-    else:
-        print(f"Could not load the sound from {audio_path}")
-
-
 class LullabiesScreen(Screen):
     currently_playing = ObjectProperty(None)
     items_added = BooleanProperty(False)
@@ -58,27 +31,56 @@ class LullabiesScreen(Screen):
             self.items_added = True
 
     def populate_lullabies(self):
-        lullabies = [("Audio 1", 1),
-                     ("Audio 2", 2),
-                     ("Audio 3", 3),
-                     ("Audio 4", 4),
-                     ("Audio 5", 5),
-                     ("Audio 6", 6),
-                     ("Audio 7", 7),
-                     ("Audio 8", 8),
-                     ("Audio 9", 9),
-                     ("Audio 10", 10)]
+        lullabies = [("Brahms' Lullaby", 1),
+                     ("Lullaby For A Frantic World", 2),
+                     ("Twinkle Twinkle Little Star", 3),
+                     ("Lullaby Goodnight", 4),
+                     ("Rock a Bye Baby", 5),
+                     ("Good Night Baby", 6),
+                     ("Old Elder's Farm", 7),
+                     ("Moonlight", 8),
+                     ("Magical stories with a twist", 9),
+                     ("Greensleeves", 10)]
         for name, var in lullabies:
             self.ids.content.add_widget(self.create_lullaby_item(name, var))
+
+    def play_audio(self, var, btn):
+        if self.currently_playing:
+            self.currently_playing.stop()
+
+        audio_paths = {
+            1: 'lullabies/Lullaby1.mp3',
+            2: 'lullabies/Lullaby2.mp3',
+            3: 'lullabies/Lullaby3.mp3',
+            4: 'lullabies/Lullaby4.mp3',
+            5: 'lullabies/Lullaby5.mp3',
+            6: 'lullabies/Lullaby6.mp3',
+            7: 'lullabies/Lullaby7.mp3',
+            8: 'lullabies/Lullaby8.mp3',
+            9: 'lullabies/Lullaby9.mp3',
+            10: 'lullabies/Lullaby10.mp3',
+        }
+        audio_path = audio_paths.get(var, 'lullabies/Default.mp3')
+
+        self.currently_playing = SoundLoader.load(audio_path)
+        if self.currently_playing:
+            self.currently_playing.play()
+        else:
+            print(f"Could not load the sound from {audio_path}")
 
     def create_lullaby_item(self, name, var):
         container = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(48))
         btn = MDFloatingActionButton(
-            icon="play-circle-outline",
-            pos_hint={'center_x': 0.3, 'center_y': 0.5},
-            on_release=lambda x, var=var: play_audio(self, var, btn)
+            icon="music",
+            pos_hint={'center_x': 0.2, 'center_y': 0.5},
+            on_release=lambda x, var=var: self.play_audio(var, btn)
         )
         label = MDLabel(text=name, halign="center", size_hint_x=None, width=dp(100))
         container.add_widget(btn)
         container.add_widget(label)
         return container
+
+    def pause_audio(self):
+        if self.currently_playing:
+            self.currently_playing.stop()
+
