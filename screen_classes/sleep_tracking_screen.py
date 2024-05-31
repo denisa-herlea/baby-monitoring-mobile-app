@@ -1,46 +1,20 @@
+import calendar
+
 from kivy.metrics import dp
-from kivy_garden.graph import Graph, MeshLinePlot
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.scrollview import ScrollView
+from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
+from kivymd.app import MDApp
+from kivymd.uix.button import MDIconButton
+from kivymd.uix.card import MDCard
 from kivymd.uix.datatables import MDDataTable
-
-
-def calculate_sleep_durations(baby_id, week_start_date):
-    conn = sqlite3.connect('baby-v.db')
-    cursor = conn.cursor()
-
-    week_end_date = week_start_date + timedelta(days=7)
-
-    cursor.execute('''
-        SELECT sleep_date, start_hour, end_hour FROM sleep_entries
-        WHERE baby_id = ? AND sleep_date BETWEEN ? AND ?
-    ''', (baby_id, week_start_date.strftime('%Y-%m-%d'), week_end_date.strftime('%Y-%m-%d')))
-
-    sleep_entries = cursor.fetchall()
-    conn.close()
-
-    day_sleep = {i: 0 for i in range(7)}
-    night_sleep = {i: 0 for i in range(7)}
-
-    for sleep_date, start, end in sleep_entries:
-        start_dt = datetime.strptime(f"{sleep_date} {start}", "%Y-%m-%d %H:%M")
-
-        if start > end:
-            end_dt = datetime.strptime(f"{sleep_date} {end}", "%Y-%m-%d %H:%M") + timedelta(days=1)
-        else:
-            end_dt = datetime.strptime(f"{sleep_date} {end}", "%Y-%m-%d %H:%M")
-
-        duration = (end_dt - start_dt).total_seconds() / 3600
-
-        if (start_dt.hour >= 20 or start_dt.hour < 7) and (end_dt.hour >= 20 or end_dt.hour < 7):
-            night_sleep[start_dt.weekday()] += duration
-        else:
-            day_sleep[start_dt.weekday()] += duration
-
-    return day_sleep, night_sleep
+from kivymd.uix.label import MDLabel
+from matplotlib import pyplot as plt
 
 
 class SleepTrackingScreen(Screen):
@@ -55,30 +29,6 @@ class SleepTrackingScreen(Screen):
     def _update_rect(self, instance, value):
         self.rect.size = self.size
         self.rect.pos = self.pos
-
-    def add_sleep_chart(self, day_sleep, night_sleep):
-        graph = Graph(xlabel='Date', ylabel='Y',
-                      x_ticks_minor=5, x_ticks_major=1, y_ticks_major=1,
-                      y_grid_label=True, x_grid_label=True, padding=5,
-                      x_grid=True, y_grid=True, xmin=0, xmax=7, ymin=0,
-                      ymax=max(max(day_sleep.values()), max(night_sleep.values())) + 1)
-
-        day_plot = MeshLinePlot(color=[1, 0.5, 0, 1])
-        night_plot = MeshLinePlot(color=[0, 0, 1, 1])
-
-        day_plot.points = [(i, day_sleep[i]) for i in range(7)]
-        night_plot.points = [(i, night_sleep[i]) for i in range(7)]
-
-        graph.add_plot(day_plot)
-        graph.add_plot(night_plot)
-        graph.size_hint = (1, 1)
-
-        self.ids.sleep_graph.clear_widgets()
-        self.ids.sleep_graph.add_widget(graph)
-
-    def create_sleep_chart(self):
-        day_sleep, night_sleep = calculate_sleep_durations(1, datetime(2024, 4, 1))
-        self.add_sleep_chart(day_sleep, night_sleep)
 
 
 class SleepRecScreen(Screen):
@@ -98,7 +48,7 @@ class SleepRecScreen(Screen):
         self.data_table = MDDataTable(
             pos_hint={'center_x': 0.5, 'center_y': 0.55},
             size_hint=(0.9, 0.8),
-            rows_num = 9,
+            rows_num=9,
             column_data=[
                 ("Age Group", dp(30)),
                 ("Recommended Sleep", dp(30))
@@ -117,3 +67,149 @@ class SleepRecScreen(Screen):
         )
 
         self.add_widget(self.data_table)
+
+
+class SleepReportScreen(Screen):
+    def on_enter(self, *args):
+        self.load_data()
+
+    def get_user_id(self):
+        app = MDApp.get_running_app()
+        return app.current_user_id
+
+    def load_data(self):
+        conn = sqlite3.connect('baby-v.db')
+        cursor = conn.cursor()
+        user_id = self.get_user_id()
+        today = datetime.now().date()
+
+        query = """
+        SELECT b.id, b.baby_name, b.date_of_birth, IFNULL(SUM(strftime('%s', se.end_hour) - strftime('%s', se.start_hour)), 0)
+        FROM babies b
+        LEFT JOIN sleep_entries se ON b.id = se.baby_id AND se.sleep_date = ?
+        WHERE b.user_id = ?
+        GROUP BY b.id, b.baby_name
+        """
+        cursor.execute(query, (today, user_id))
+        babies = cursor.fetchall()
+
+        self.ids.cards_container.clear_widgets()
+        for baby_id, baby_name, dob, total_seconds in babies:
+            recommended_sleep = 0
+            age_months = -1
+            if dob is not '':
+                age_months = (today - datetime.strptime(dob, '%Y-%m-%d').date()).days / 30
+
+            if age_months <= 4 and age_months != -1:
+                recommended_sleep = 16
+            elif 4 < age_months < 12:
+                recommended_sleep = 14
+            elif 12 <= age_months < 36:
+                recommended_sleep = 12.5
+            elif 36 <= age_months < 60:
+                recommended_sleep = 12
+            elif age_months == -1:
+                recommended_sleep = 0
+
+            hours_slept = total_seconds / 3600
+            card = self.create_card(baby_id, baby_name, hours_slept, recommended_sleep)
+            self.ids.cards_container.add_widget(card)
+
+        conn.close()
+
+    def create_card(self, baby_id, baby_name, hours_slept, recommended_sleep):
+        card = MDCard(size_hint=(None, None), size=("280dp", "100dp"),
+                      md_bg_color=[0.68, 0.85, 0.9, 1],
+                      orientation='horizontal')
+
+        icon_layout = BoxLayout(size_hint=(None, 1), width=card.height)
+        sleep_icon = MDIconButton(icon='weather-night', size_hint=(None, None), size=(50, 50))
+        icon_layout.add_widget(sleep_icon)
+
+        label_layout = BoxLayout(orientation='vertical', padding=(10, 0, 0, 0))
+        if recommended_sleep != 0:
+            label = MDLabel(text=f"{baby_name}: {hours_slept:.1f}/{recommended_sleep} hours",
+                            halign='center', theme_text_color='Custom', text_color=[0.2, 0.2, 0.2, 1])
+        else:
+            label = MDLabel(text=f"{baby_name}: {hours_slept:.1f} hours",
+                            halign='center', theme_text_color='Custom', text_color=[0.2, 0.2, 0.2, 1])
+        label_layout.add_widget(label)
+
+        card.add_widget(icon_layout)
+        card.add_widget(label_layout)
+        card.bind(on_release=lambda x: self.show_sleep_chart(baby_id, recommended_sleep))
+
+        return card
+
+    def show_sleep_chart(self, baby_id, recommended_sleep):
+        conn = sqlite3.connect('baby-v.db')
+        cursor = conn.cursor()
+
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=6)
+
+        query = """
+        SELECT sleep_date, start_hour, end_hour 
+        FROM sleep_entries 
+        WHERE baby_id = ? AND sleep_date BETWEEN ? AND ?
+        """
+        cursor.execute(query, (baby_id, start_date, end_date))
+        sleep_entries = cursor.fetchall()
+
+        days = []
+        day_sleep = []
+        night_sleep = []
+
+        for i in range(7):
+            date = start_date + timedelta(days=i)
+            days.append(calendar.day_name[date.weekday()])
+            day_total = 0
+            night_total = 0
+            for entry in sleep_entries:
+                sleep_date, start_hour, end_hour = entry
+                if sleep_date == date.strftime('%Y-%m-%d'):
+                    start = datetime.strptime(start_hour, '%H:%M').time()
+                    end = datetime.strptime(end_hour, '%H:%M').time()
+                    if start >= time(7, 0) and end <= time(20, 0):
+                        day_total += (datetime.combine(date, end) - datetime.combine(date, start)).seconds
+                    else:
+                        night_total += (datetime.combine(date, end) - datetime.combine(date, start)).seconds
+            day_sleep.append(day_total / 3600)
+            night_sleep.append(night_total / 3600)
+
+        fig, ax = plt.subplots(figsize=(3.6, 6.4))
+        ax.barh(days, day_sleep, label='Day Sleep', color='pink')
+        ax.barh(days, night_sleep, left=day_sleep, label='Night Sleep', color='lightblue')
+        ax.set_ylabel('Day of the Week')
+        ax.set_xlabel('Hours of Sleep')
+        ax.set_title('Sleep Duration over the Last Week')
+        if recommended_sleep == 0:
+            recommended_sleep = 16
+        ax.set_xlim(0, recommended_sleep)
+        ax.legend()
+
+        for label in ax.get_yticklabels():
+            label.set_rotation(45)
+            label.set_ha('right')
+
+        chart_container = self.ids.chart_container
+        chart_container.clear_widgets()
+
+        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False, do_scroll_y=True)
+        scroll_view.add_widget(FigureCanvasKivyAgg(fig))
+
+        chart_container.add_widget(scroll_view)
+
+        close_button = self.ids.close_button
+        close_button.opacity = 1
+        close_button.disabled = False
+
+        conn.close()
+
+    def hide_chart(self):
+        chart_container = self.ids.chart_container
+        chart_container.clear_widgets()
+
+        close_button = self.ids.close_button
+        close_button.opacity = 0
+        close_button.disabled = True

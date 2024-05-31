@@ -12,13 +12,16 @@ ScreenManager:
     VideoScreen:
     SleepEntryScreen:
     FeedingEntryScreen:
+    FeedingReportScreen:
     AccountScreen:
     ChooseBabyScreen:
     UpdateBabyScreen:
     AddNewBabyScreen:
     SleepRecScreen:
+    SleepReportScreen:
     LogMeasurementScreen:
     VaccinesScreen:
+    MeasurementReportScreen:
 
 <LoginScreen>:
     name: 'Login'
@@ -575,12 +578,12 @@ ScreenManager:
                     on_press: root.manager.current = 'SleepEntry'
                     IconLeftWidget:
                         icon: 'plus'
-
+                        
                 OneLineIconListItem:
-                    text: "View Sleep Chart"
-                    #on_press: root.plot_sleep_chart_call()
+                    text: "View Sleep Report"
+                    on_press: root.manager.current = 'SleepReport'
                     IconLeftWidget:
-                        icon: 'chart-bell-curve'
+                        icon: 'file-chart'
                         
                 OneLineIconListItem:
                     text: "Recommended Hours of Sleep"
@@ -588,21 +591,79 @@ ScreenManager:
                     IconLeftWidget:
                         icon: 'sleep'
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        elevation_normal: 12
 
 
+<SleepReportScreen>:
+    name: 'SleepReport'
+    
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.15, 'center_y': 0.9}
+        elevation_normal: 12
+        on_press: root.manager.current = 'SleepTracking'
+    
+    MDLabel:
+        text: "Sleep Report"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
+        halign: "center"
+        font_style: "H6"
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+
+    ScrollView:
+        size_hint: (1, None) 
+        size: (root.width, root.height - dp(80)) 
+        pos_hint: {'center_x': 0.6, 'top': 0.85}
+
+        GridLayout:
+            id: cards_container
+            cols: 1
+            pos_hint: {'center_x': 0.6,'center_y': 0.2}
+            size_hint_y: None
+            width: 340
+            height: self.minimum_height
+            spacing: dp(10)
+            padding: dp(10)
+
+    BoxLayout:
+        id: chart_container
+        orientation: 'vertical'
+        size_hint: 1, 0.5
+        pos_hint: {'center_x': 0.5, 'y': 0.25}
+
+    MDIconButton:
+        id: close_button
+        icon: "close"
+        size_hint: None, None
+        size: dp(30), dp(30)
+        pos_hint: {'center_x': 0.95, 'center_y': 0.72}
+        on_press: root.hide_chart()
+        opacity: 0
+        disabled: True
+        
+            
 <SleepRecScreen>:
     name: 'SleepRec'
     BoxLayout:
         orientation: 'vertical'
-    
-                    
-    MDFillRoundFlatButton:
-        text: "Back"
+             
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        elevation_normal: 12
         on_press: root.manager.current = 'SleepTracking'
         
 <SleepEntryScreen>:        
@@ -683,9 +744,12 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_release: root.add_sleep_entry("", root.ids.baby_selector.text, root.ids.start_hour.text, root.ids.end_hour.text, root.ids.sleep_date.text, root.ids.sleep_notes.text)
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        elevation_normal: 12
         on_press: root.manager.current = 'SleepTracking'
     
     
@@ -714,15 +778,18 @@ ScreenManager:
                         icon: 'plus'
 
                 OneLineIconListItem:
-                    text: "View Feeding Chart"
-                    #on_press: root.plot_sleep_chart_call()
+                    text: "View Feeding Report"
+                    on_press: root.manager.current = 'FeedingReport'
                     IconLeftWidget:
-                        icon: 'chart-line'
+                        icon: 'food-apple'
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        elevation_normal: 12
     
     
 
@@ -810,12 +877,67 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_release:  root.add_food_entry("",root.ids.baby_selector.text, root.ids.feed_hour.text, root.ids.feed_date.text, int(root.ids.milk_slider.value), root.ids.feed_notes.text)
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        elevation_normal: 12
         on_press: root.manager.current = 'FeedingTracking'
 
+
+<FeedingReportScreen>:
+    name: 'FeedingReport'
     
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.15, 'center_y': 0.9}
+        elevation_normal: 12
+        on_press: root.manager.current = 'FeedingTracking'
+    
+    MDLabel:
+        text: "Feeding Report"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
+        halign: "center"
+        font_style: "H6"
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+
+    ScrollView:
+        size_hint: (1, None) 
+        size: (root.width, root.height - dp(80)) 
+        pos_hint: {'center_x': 0.6, 'top': 0.85}
+
+        GridLayout:
+            id: cards_container
+            cols: 1
+            pos_hint: {'center_x': 0.6,'center_y': 0.2}
+            size_hint_y: None
+            width: 340
+            height: self.minimum_height
+            spacing: dp(10)
+            padding: dp(10)
+
+    BoxLayout:
+        id: chart_container
+        orientation: 'vertical'
+        size_hint: 1, 0.5
+        pos_hint: {'center_x': 0.5, 'y': 0.25}
+
+    MDIconButton:
+        id: close_button
+        icon: "close"
+        size_hint: None, None
+        size: dp(30), dp(30)
+        pos_hint: {'center_x': 0.9, 'center_y': 0.72}
+        on_press: root.hide_chart()
+        opacity: 0
+        disabled: True
+        
     
 <GrowthHealthTrackingScreen>:        
     name: 'GrowthHealthTracking'
@@ -839,23 +961,26 @@ ScreenManager:
                     on_press: root.manager.current = 'LogMeasurement'
                     IconLeftWidget:
                         icon: 'plus'
+                        
+                OneLineIconListItem:
+                    text: "View Growth Report"
+                    on_press: root.manager.current = 'MeasurementReport'
+                    IconLeftWidget:
+                        icon: 'chart-line'
 
                 OneLineIconListItem:
                     text: "Vaccination Tracker"
                     on_press: root.manager.current = 'Vaccines'
                     IconLeftWidget:
                         icon: 'needle'
-
-                OneLineIconListItem:
-                    text: "View Growth Chart"
-                    #on_press: root.show_growth_chart()
-                    IconLeftWidget:
-                        icon: 'chart-line'
          
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        elevation_normal: 12
 
 
 <LogMeasurementScreen>:
@@ -935,19 +1060,77 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_release: root.save_measurement("",root.ids.baby_selector.text, root.ids.measurement_date.text, root.ids.height_field.text, root.ids.weight_field.text, root.ids.head_circ_field.text)
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        elevation_normal: 12
         on_press: root.manager.current = 'GrowthHealthTracking'
+        
+<MeasurementReportScreen>:
+    name: 'MeasurementReport'
+    
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.15, 'center_y': 0.9}
+        elevation_normal: 12
+        on_press: root.manager.current = 'GrowthHealthTracking'
+    
+    MDLabel:
+        text: "Measurement Report"
+        theme_text_color: "Custom"
+        text_color: 0.9, 0.68, 0.86, 1
+        halign: "center"
+        font_style: "H6"
+        size_hint_y: None
+        height: dp(40)
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+
+    ScrollView:
+        size_hint: (1, None) 
+        size: (root.width, root.height - dp(80)) 
+        pos_hint: {'center_x': 0.6, 'top': 0.85}
+
+        GridLayout:
+            id: cards_container
+            cols: 1
+            pos_hint: {'center_x': 0.6,'center_y': 0.2}
+            size_hint_y: None
+            width: 340
+            height: self.minimum_height
+            spacing: dp(10)
+            padding: dp(10)
+
+    BoxLayout:
+        id: chart_container
+        orientation: 'vertical'
+        pos_hint: {'center_x': 0.5}
+
+    MDIconButton:
+        id: close_button
+        icon: "close"
+        size_hint: None, None
+        size: dp(30), dp(30)
+        pos_hint: {'center_x': 0.9, 'center_y': 0.97}
+        on_press: root.hide_chart()
+        opacity: 0
+        disabled: True     
+
         
 <VaccinesScreen>:
     name: 'Vaccines'
     BoxLayout:
         orientation: 'vertical' 
                     
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        elevation_normal: 12
         on_press: root.manager.current = 'GrowthHealthTracking'
 
 
@@ -974,10 +1157,13 @@ ScreenManager:
             spacing: dp(10)
             padding: dp(10)
 
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.4, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        elevation_normal: 12
         
     MDFloatingActionButton:
         icon: "stop"
@@ -1007,9 +1193,12 @@ ScreenManager:
         on_press: root.toggle_icon()
         elevation_normal: 12
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        elevation_normal: 12
         
 """

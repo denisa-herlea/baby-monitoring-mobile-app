@@ -26,9 +26,10 @@ from screen_classes.login_screen import LoginScreen
 from screen_classes.register_screen import RegisterScreen
 from screen_classes.welcome_screen import WelcomeScreen
 from screen_classes.home_screen import HomeScreen
-from screen_classes.sleep_tracking_screen import SleepTrackingScreen, SleepRecScreen
-from screen_classes.feeding_tracking_screen import FeedingTrackingScreen
-from screen_classes.growth_health_tracking_screen import GrowthHealthTrackingScreen, LogMeasurementScreen, VaccinesScreen
+from screen_classes.sleep_tracking_screen import SleepTrackingScreen, SleepRecScreen, SleepReportScreen
+from screen_classes.feeding_tracking_screen import FeedingTrackingScreen, FeedingReportScreen
+from screen_classes.growth_health_tracking_screen import GrowthHealthTrackingScreen, LogMeasurementScreen, \
+    VaccinesScreen, MeasurementReportScreen
 from screen_classes.video_screen import VideoScreen
 from screen_classes.sleep_entry_screen import SleepEntryScreen
 from screen_classes.feeding_entry_screen import FeedingEntryScreen
@@ -41,6 +42,7 @@ sm.add_widget(RegisterScreen(name='Register'))
 sm.add_widget(WelcomeScreen(name='Welcome'))
 sm.add_widget(HomeScreen(name='Home'))
 sm.add_widget(FeedingTrackingScreen(name='FeedingTracking'))
+sm.add_widget(FeedingReportScreen(name='FeedingReport'))
 sm.add_widget(SleepTrackingScreen(name='SleepTracking'))
 sm.add_widget(SleepRecScreen(name='SleepRec'))
 sm.add_widget(GrowthHealthTrackingScreen(name='GrowthHealthTracking'))
@@ -54,6 +56,9 @@ sm.add_widget(AccountScreen(name='Account'))
 sm.add_widget(UpdateBabyScreen(name='UpdateBaby'))
 sm.add_widget(ChooseBabyScreen(name='ChooseBaby'))
 sm.add_widget(AddNewBabyScreen(name='AddNewBaby'))
+sm.add_widget(SleepReportScreen(name='SleepReport'))
+sm.add_widget(MeasurementReportScreen(name='MeasurementReport'))
+
 
 class VideoStreamWidget(Image):
     def start_stream(self, url):
@@ -301,50 +306,5 @@ class DemoApp(MDApp):
 
         conn.close()
 
+
 DemoApp().run()
-
-"""
-import sounddevice as sd
-import websocket
-import _thread as thread
-import numpy as np
-import time
-
-ws = None
-
-def audio_callback(indata, frames, time, status):
-    global ws
-    if ws and ws.sock and ws.sock.connected:
-        ws.send(indata.tobytes(), opcode=websocket.ABNF.OPCODE_BINARY)
-
-def on_message(ws, message):
-    print("Received message:", message)
-
-def on_error(ws, error):
-    print("Error:", error)
-
-def on_close(ws):
-    print("### WebSocket Closed ###")
-
-def on_open(ws):
-    print("WebSocket opened")
-    stream = sd.InputStream(callback=audio_callback)
-    stream.start()
-    print("Audio stream started")
-
-def ensure_websocket():
-    global ws
-    if not ws or not ws.sock or not ws.sock.connected:
-        ws = websocket.WebSocketApp("wss://192.168.0.122:5000/audio_stream",
-                                    on_message=on_message,
-                                    on_error=on_error,
-                                    on_close=on_close)
-        ws.on_open = on_open
-        ws.run_forever()
-
-if __name__ == "__main__":
-    websocket.enableTrace(True)
-    thread.start_new_thread(ensure_websocket, ())
-    while True:
-        time.sleep(1)
-"""

@@ -2,10 +2,18 @@ import sqlite3
 
 from kivy.graphics import Color, Rectangle
 from kivy.metrics import dp
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen
+from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
+from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.card import MDCard
 from kivymd.uix.datatables import MDDataTable
+from kivymd.uix.label import MDLabel
 from kivymd.uix.menu import MDDropdownMenu
+from kivy_garden.matplotlib.backend_kivyagg import FigureCanvasKivyAgg
+from matplotlib import pyplot as plt
+from datetime import datetime, timedelta
 
 
 class GrowthHealthTrackingScreen(Screen):
@@ -173,3 +181,182 @@ class VaccinesScreen(Screen):
         )
 
         self.add_widget(self.data_table)
+
+
+class MeasurementReportScreen(Screen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        with self.canvas.before:
+            Color(255 / 255.0, 255 / 255.0, 255 / 255.0, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+
+        self.bind(size=self._update_rect, pos=self._update_rect)
+
+    def _update_rect(self, instance, value):
+        self.rect.size = self.size
+        self.rect.pos = self.pos
+
+    def on_enter(self, *args):
+        self.load_data()
+
+    def get_user_id(self):
+        app = MDApp.get_running_app()
+        return app.current_user_id
+
+    def load_data(self):
+        conn = sqlite3.connect('baby-v.db')
+        cursor = conn.cursor()
+        user_id = self.get_user_id()
+
+
+        query = """
+        SELECT b.id, b.baby_name
+        FROM babies b
+        WHERE b.user_id = ?
+        """
+        cursor.execute(query, (user_id,))
+        babies = cursor.fetchall()
+
+        self.ids.cards_container.clear_widgets()
+        for baby_id, baby_name in babies:
+            card = self.create_card(baby_id, baby_name)
+            self.ids.cards_container.add_widget(card)
+
+        conn.close()
+
+    def create_card(self, baby_id, baby_name):
+        card = MDCard(size_hint=(None, None), size=("280dp", "100dp"),
+                      md_bg_color=[185 / 255, 220 / 255, 170 / 255, 1],
+                      orientation='vertical',
+                      padding=20)
+
+        button_layout = BoxLayout(orientation='vertical', spacing=10, size_hint_y=None, height=40)
+
+        growth_chart_button = MDRaisedButton(text="Growth Chart", text_color=[0, 0.2, 0.2, 1], size_hint=(None, None), size=(250, 50),
+                                             md_bg_color=[235 / 255, 230 / 255, 210 / 255, 1])
+        growth_chart_button.bind(on_press=lambda x: self.show_growth_chart(baby_id))
+
+        measurement_table_button = MDRaisedButton(text="Measurement Table", text_color=[0.2, 0.2, 0.2, 1], size_hint=(None, None), size=(250, 50), md_bg_color=[125 / 255, 205 / 255, 230 / 255, 1])
+        measurement_table_button.bind(on_press=lambda x: self.show_measurement_table(baby_id))
+
+        button_layout.add_widget(growth_chart_button)
+        button_layout.add_widget(measurement_table_button)
+
+        label_layout = BoxLayout(orientation='vertical', padding=(20, 20, 20, 20), size_hint_y=None, height=40)
+        label = MDLabel(text=f"{baby_name}", halign='right', theme_text_color='Custom',
+                        text_color=[0.2, 0.2, 0.2, 1])
+        label_layout.add_widget(label)
+
+        card.add_widget(label_layout)
+        card.add_widget(button_layout)
+
+        return card
+
+    def show_growth_chart(self, baby_id):
+        conn = sqlite3.connect('baby-v.db')
+        cursor = conn.cursor()
+
+        query = """
+        SELECT measurement_date, height, weight, head_circ
+        FROM measurement_entries
+        WHERE baby_id = ?
+        ORDER BY measurement_date
+        """
+        cursor.execute(query, (baby_id,))
+        measurements = cursor.fetchall()
+
+        dates = [datetime.strptime(entry[0], '%Y-%m-%d').date() for entry in measurements]
+        heights = [entry[1] for entry in measurements]
+        weights = [entry[2] for entry in measurements]
+        head_circs = [entry[3] for entry in measurements]
+
+        fig, ax = plt.subplots(3, 1, figsize=(7, 12), sharex=True)
+
+        ax[0].plot(dates, heights, marker='o', linestyle='-', color='lightblue')
+        ax[0].set_ylabel('Height (cm)')
+        ax[0].set_title('Growth Over Time', fontsize=14)
+
+        ax[1].plot(dates, weights, marker='o', linestyle='-', color='green')
+        ax[1].set_ylabel('Weight (kg)')
+
+        ax[2].plot(dates, head_circs, marker='o', linestyle='-', color='pink')
+        ax[2].set_ylabel('Head Circumference (cm)')
+        ax[2].set_xlabel('Date')
+
+        for ax_ in ax:
+            for label in ax_.get_xticklabels():
+                label.set_rotation(45)
+                label.set_ha('right')
+
+        plt.tight_layout()
+
+        chart_container = self.ids.chart_container
+        chart_container.clear_widgets()
+
+        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False, do_scroll_y=True)
+        scroll_view.add_widget(FigureCanvasKivyAgg(fig))
+
+        chart_container.add_widget(scroll_view)
+
+        close_button = self.ids.close_button
+        close_button.opacity = 1
+        close_button.disabled = False
+
+        conn.close()
+
+    def show_measurement_table(self, baby_id):
+        conn = sqlite3.connect('baby-v.db')
+        cursor = conn.cursor()
+
+        query = """
+        SELECT measurement_date, height, weight, head_circ
+        FROM measurement_entries
+        WHERE baby_id = ?
+        ORDER BY measurement_date
+        """
+        cursor.execute(query, (baby_id,))
+        measurements = cursor.fetchall()
+
+        table_data = []
+        for entry in measurements:
+            measurement_date, height, weight, head_circ = entry
+            height_m = height / 100
+            bmi = weight / (height_m ** 2) if height_m > 0 else 0
+            table_data.append((round(bmi, 2), height, weight, head_circ, measurement_date))
+
+        data_table = MDDataTable(
+            size_hint=(1, 1),
+            pos_hint=(0.5, 0.5),
+            column_data=[
+                ("BMI", dp(15)),
+                ("Height (cm)", dp(20)),
+                ("Weight (kg)", dp(20)),
+                ("Head Circumference (cm)", dp(30)),
+                ("Date", dp(30)),
+            ],
+            row_data=table_data
+        )
+
+        chart_container = self.ids.chart_container
+        chart_container.clear_widgets()
+
+        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False, do_scroll_y=True)
+        scroll_view.add_widget(data_table)
+
+        chart_container.add_widget(scroll_view)
+
+        close_button = self.ids.close_button
+        close_button.opacity = 1
+        close_button.disabled = False
+
+        conn.close()
+
+    def hide_chart(self):
+        chart_container = self.ids.chart_container
+        chart_container.clear_widgets()
+
+        close_button = self.ids.close_button
+        close_button.opacity = 0
+        close_button.disabled = True
+
+
