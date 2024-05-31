@@ -270,7 +270,7 @@ class MeasurementReportScreen(Screen):
         weights = [entry[2] for entry in measurements]
         head_circs = [entry[3] for entry in measurements]
 
-        fig, ax = plt.subplots(3, 1, figsize=(7, 12), sharex=True)
+        fig, ax = plt.subplots(3, 1, figsize=(5, 12), sharex=True)
 
         ax[0].plot(dates, heights, marker='o', linestyle='-', color='lightblue')
         ax[0].set_ylabel('Height (cm)')
