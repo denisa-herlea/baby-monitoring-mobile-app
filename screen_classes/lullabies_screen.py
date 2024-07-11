@@ -1,3 +1,4 @@
+import websockets
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.material_resources import dp
 from kivymd.uix.button import MDFloatingActionButton
@@ -8,12 +9,18 @@ from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
 
+from kivy.network.urlrequest import UrlRequest
+import asyncio
+
 class LullabiesScreen(Screen):
     currently_playing = ObjectProperty(None)
     items_added = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        with self.canvas.before:
+            Color(255 / 255.0, 255 / 255.0, 255 / 255.0, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(size=self._update_rect, pos=self._update_rect)
 
     def _update_rect(self, instance, value):
@@ -83,4 +90,14 @@ class LullabiesScreen(Screen):
     def pause_audio(self):
         if self.currently_playing:
             self.currently_playing.stop()
+
+    async def send_lullaby_command(self):
+        uri = "ws://192.168.195.187:5679"
+        async with websockets.connect(uri) as websocket:
+            await websocket.send("PLAY_LULLABY")
+            response = await websocket.recv()
+            print(response)
+
+    def play(self):
+        asyncio.run(self.send_lullaby_command())
 

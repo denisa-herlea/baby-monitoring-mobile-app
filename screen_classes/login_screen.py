@@ -1,6 +1,7 @@
 from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen
 
+
 class LoginScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

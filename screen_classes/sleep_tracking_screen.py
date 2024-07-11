@@ -84,17 +84,37 @@ class SleepReportScreen(Screen):
         today = datetime.now().date()
 
         query = """
-        SELECT b.id, b.baby_name, b.date_of_birth, IFNULL(SUM(strftime('%s', se.end_hour) - strftime('%s', se.start_hour)), 0)
+        SELECT b.id, b.baby_name, b.date_of_birth, se.start_hour, se.end_hour
         FROM babies b
         LEFT JOIN sleep_entries se ON b.id = se.baby_id AND se.sleep_date = ?
         WHERE b.user_id = ?
-        GROUP BY b.id, b.baby_name
         """
         cursor.execute(query, (today, user_id))
-        babies = cursor.fetchall()
+        sleep_data = cursor.fetchall()
+
+        babies = {}
+        for row in sleep_data:
+            baby_id, baby_name, dob, start_hour, end_hour = row
+            if baby_id not in babies:
+                babies[baby_id] = {
+                    "baby_name": baby_name,
+                    "dob": dob,
+                    "total_seconds": 0
+                }
+            if start_hour and end_hour:
+                start_dt = datetime.strptime(start_hour, '%H:%M')
+                end_dt = datetime.strptime(end_hour, '%H:%M')
+                if end_dt < start_dt:
+                    end_dt += timedelta(days=1)
+                duration = (end_dt - start_dt).seconds
+                babies[baby_id]["total_seconds"] += duration
 
         self.ids.cards_container.clear_widgets()
-        for baby_id, baby_name, dob, total_seconds in babies:
+        for baby_id, data in babies.items():
+            baby_name = data["baby_name"]
+            dob = data["dob"]
+            total_seconds = data["total_seconds"]
+
             recommended_sleep = 0
             age_months = -1
             if dob is not '':
@@ -138,7 +158,6 @@ class SleepReportScreen(Screen):
         card.add_widget(icon_layout)
         card.add_widget(label_layout)
         card.bind(on_release=lambda x: self.show_sleep_chart(baby_id, recommended_sleep))
-
         return card
 
     def show_sleep_chart(self, baby_id, recommended_sleep):
@@ -170,12 +189,39 @@ class SleepReportScreen(Screen):
                 if sleep_date == date.strftime('%Y-%m-%d'):
                     start = datetime.strptime(start_hour, '%H:%M').time()
                     end = datetime.strptime(end_hour, '%H:%M').time()
-                    if start >= time(7, 0) and end <= time(20, 0):
-                        day_total += (datetime.combine(date, end) - datetime.combine(date, start)).seconds
+                    start_dt = datetime.combine(date, start)
+                    end_dt = datetime.combine(date, end)
+
+                    if start < time(7, 0):
+                        day_start_dt = datetime.combine(date, time(7, 0))
+                        if end <= time(7, 0):
+                            night_total += (end_dt - start_dt).seconds
+                        elif end <= time(20, 0):
+                            night_total += (day_start_dt - start_dt).seconds
+                            day_total += (end_dt - day_start_dt).seconds
+                        else:
+                            night_total += (day_start_dt - start_dt).seconds
+                            day_end_dt = datetime.combine(date, time(20, 0))
+                            day_total += (day_end_dt - day_start_dt).seconds
+                            night_total += (end_dt - day_end_dt).seconds
+                    elif start <= time(20, 0):
+                        day_end_dt = datetime.combine(date, time(20, 0))
+                        if end <= time(20, 0):
+                            day_total += (end_dt - start_dt).seconds
+                        else:
+                            day_total += (day_end_dt - start_dt).seconds
+                            night_total += (end_dt - day_end_dt).seconds
                     else:
-                        night_total += (datetime.combine(date, end) - datetime.combine(date, start)).seconds
+                        night_total += (end_dt - start_dt).seconds
+
             day_sleep.append(day_total / 3600)
             night_sleep.append(night_total / 3600)
+
+        if len(days) != len(day_sleep) or len(days) != len(night_sleep):
+            print("Mismatch in lengths of lists:", len(days), len(day_sleep), len(night_sleep))
+            return
+
+        print(day_sleep, night_sleep)
 
         fig, ax = plt.subplots(figsize=(3.6, 6.4))
         ax.barh(days, day_sleep, label='Day Sleep', color='pink')

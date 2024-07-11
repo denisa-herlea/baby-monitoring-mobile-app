@@ -5,6 +5,8 @@ Config.set('graphics', 'height', '640')
 
 import sqlite3
 from datetime import datetime
+import asyncio
+import websockets
 
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.app import MDApp
@@ -14,7 +16,6 @@ from kivy.lang import Builder
 from helper import screen_helper
 from kivymd.uix.pickers import MDDatePicker, MDTimePicker
 from kivymd.uix.button import MDFlatButton
-from sleep_tracking import plot_sleep_chart_call
 
 import cv2
 from kivy.uix.image import Image
@@ -59,6 +60,27 @@ sm.add_widget(AddNewBabyScreen(name='AddNewBaby'))
 sm.add_widget(SleepReportScreen(name='SleepReport'))
 sm.add_widget(MeasurementReportScreen(name='MeasurementReport'))
 
+class NotificationListener:
+    def __init__(self, app):
+        self.app = app
+        self.keep_running = True
+
+    async def connect_websocket(self):
+        uri = "ws://192.168.195.187:5678"
+        while self.keep_running:
+            async with websockets.connect(uri) as websocket:
+                while True:
+                    message = await websocket.recv()
+                    self.app.send_notification(message)
+
+    def start(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.connect_websocket())
+
+    def stop(self):
+        self.keep_running = False
+
 
 class VideoStreamWidget(Image):
     def start_stream(self, url):
@@ -76,20 +98,46 @@ class VideoStreamWidget(Image):
 
 class DemoApp(MDApp):
     current_user_id = None
+    notifications_enabled = False
+    notification = ""
 
     def build(self):
         self.theme_cls.theme_style = "Light"
         screen = Builder.load_string(screen_helper)
+        self.notification_listener = NotificationListener(self)
+        Clock.schedule_once(self.init_websocket)
         return screen
 
     def on_start(self):
-        sleep_screen = self.root.get_screen('SleepTracking')
         video_screen = self.root.get_screen('Video')
 
         video_widget = video_screen.ids.video_stream
-        video_widget.start_stream('http://192.168.0.122:5000/video_feed')
+        video_widget.start_stream('http://192.168.195.187:5000/video_feed')
 
-        sleep_screen.plot_sleep_chart_call = plot_sleep_chart_call
+    def init_websocket(self, *args):
+        from threading import Thread
+        Thread(target=self.notification_listener.start).start()
+
+    def send_notification(self, message):
+        print(f"Received notification: {message}")
+        self.notification = message
+
+        notification_bar = self.root.get_screen('Home').ids.notification_bar
+        if message == "X" and self.notifications_enabled:
+            notification_bar.height = 100
+        else:
+            notification_bar.height = 0
+
+    def toggle_notifications(self, value):
+        self.notifications_enabled = value
+        self.update_notification_bar()
+
+    def update_notification_bar(self):
+        notification_bar = self.root.get_screen('Home').ids.notification_bar
+        if self.notifications_enabled and self.notification == "X":
+            notification_bar.height = 100
+        else:
+            notification_bar.height = 0
 
     # -----------------  DIALOGS  ---------------------
     def back_to_login(self):

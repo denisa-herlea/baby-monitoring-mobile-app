@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS measurement_entries (
 )
 ''')
 
-"""
 cursor.execute('''
     DROP TABLE users
 ''')
@@ -80,6 +79,5 @@ cursor.execute('''
 )
 ''')
 
-"""
 conn.commit()
 conn.close()

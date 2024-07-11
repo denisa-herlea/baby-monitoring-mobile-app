@@ -115,9 +115,12 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_release: app.create_account(root.ids.username.text, root.ids.password.text, root.ids.first_name.text, root.ids.last_name.text)
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
+        elevation_normal: 12
         on_release: app.back_to_login()
           
         
@@ -278,10 +281,14 @@ ScreenManager:
         md_bg_color: 0.9, 0.68, 0.86, 1
         on_press: root.show_delete_confirmation()
         
-    MDFillRoundFlatButton:
-        text: "Back"
-        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
+    MDIconButton:
+        icon: "arrow-right-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.8, 'center_y': 0.1}
         on_press: root.manager.current = 'Home'
+        elevation_normal: 12
+        
         
 <AddNewBabyScreen>:
     name: 'AddNewBaby'
@@ -356,10 +363,13 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         on_release: root.save_baby_details(root.ids.baby_name.text, root.ids.date_of_birth.text, root.ids.hour_of_birth.text, root.ids.birth_weight.text, root.ids.birth_height.text)
         
-    MDFillRoundFlatButton:
-        text: "Back"
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'ChooseBaby'
+        elevation_normal: 12
 
 <ChooseBabyScreen>:
     name: 'ChooseBaby'
@@ -377,11 +387,14 @@ ScreenManager:
         pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         md_bg_color: 0.9, 0.68, 0.86, 1
         on_press: root.manager.current = 'AddNewBaby'
-    
-    MDFillRoundFlatButton:
-        text: "Back"
+        
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'Account'
+        elevation_normal: 12
 
 <UpdateBabyScreen>:
     name: 'UpdateBaby'
@@ -484,11 +497,14 @@ ScreenManager:
         md_bg_color: 0.9, 0.68, 0.86, 1
         pos_hint: {'center_x': 0.80, 'center_y': 0.35}
         on_press: root.update_birth_height(root.ids.birth_height.text)
-    
-    MDFillRoundFlatButton:
-        text: "Back"
+        
+    MDIconButton:
+        icon: "arrow-left-circle"
+        size_hint: None, None
+        size: dp(150), dp(150) 
         pos_hint: {'center_x': 0.5, 'center_y': 0.1}
         on_press: root.manager.current = 'ChooseBaby'
+        elevation_normal: 12
         
         
 <HomeScreen>:        
@@ -537,22 +553,38 @@ ScreenManager:
         
     MDFloatingActionButton:
         icon: 'video-outline'
-        pos_hint: {'center_x': 0.4, 'center_y': 0.2}
+        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
         md_bg_color: 0.9, 0.68, 0.86, 1
         on_press: root.manager.current = 'Video'
         size: dp(150), dp(150)
         elevation_normal: 12
         
+    MDSwitch:
+        id: notification_switch
+        pos_hint: {'center_x': 0.85, 'center_y': 0.935}
+        active: False
+        on_active: app.toggle_notifications(self.active)
         
-    MDFloatingActionButton:
-        icon: root.icon_audio
-        size_hint: None, None
-        md_bg_color: 0.9, 0.68, 0.86, 1
-        size: dp(150), dp(150) 
-        pos_hint: {'center_x': 0.6, 'center_y': 0.2}
-        on_press: root.toggle_icon_audio()
-        elevation_normal: 12
-       
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            id: notification_bar
+            size_hint_y: None
+            height: 0
+            pos_hint: {'top': 1}
+            canvas.before:
+                Color:
+                    rgba: 1, 0, 0, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Label:
+                text: "The baby is crying!"
+                pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+                size_hint_y: None
+                height: self.texture_size[1]
+                color: [1, 1, 1, 1]
         
 <SleepTrackingScreen>:        
     name: 'SleepTracking'
@@ -1174,6 +1206,15 @@ ScreenManager:
         on_press: root.pause_audio()
         elevation_normal: 12
         
+    MDFloatingActionButton:
+        icon: "stop"
+        size_hint: None, None
+        size: dp(150), dp(150) 
+        md_bg_color: 1, 0, 0, 1
+        pos_hint: {'center_x': 0.8, 'center_y': 0.1}
+        on_press: root.play()
+        elevation_normal: 12
+        
  
     
 <VideoScreen>:        
@@ -1186,11 +1227,21 @@ ScreenManager:
         pos: 0, 0
         
     MDFloatingActionButton:
-        icon: root.icon
+        icon: root.icon_speaker
         size_hint: None, None
         size: dp(150), dp(150) 
-        pos_hint: {'center_x': 0.5, 'center_y': 0.2}
-        on_press: root.toggle_icon()
+        pos_hint: {'center_x': 0.4, 'center_y': 0.2}
+        md_bg_color: 0.9, 0.68, 0.86, 1
+        on_press: root.toggle_icon_speaker()
+        elevation_normal: 12
+        
+    MDFloatingActionButton:
+        icon: root.icon_audio
+        size_hint: None, None
+        md_bg_color: 0.9, 0.68, 0.86, 1
+        size: dp(150), dp(150) 
+        pos_hint: {'center_x': 0.6, 'center_y': 0.2}
+        on_press: root.toggle_icon_audio()
         elevation_normal: 12
         
     MDIconButton:

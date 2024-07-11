@@ -7,7 +7,8 @@ import requests
 
 
 class VideoScreen(Screen):
-    icon = StringProperty('volume-off')
+    icon_speaker = StringProperty('volume-off')
+    icon_audio = StringProperty('microphone-off')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -21,14 +22,21 @@ class VideoScreen(Screen):
         self.stream = None
         self.audio_thread = None
 
-    def toggle_icon(self):
-        if not self.audio_streaming:
-            self.start_audio_stream()
-            self.icon = 'volume-off'
+    def toggle_icon_speaker(self):
+        #if not self.audio_streaming:
+            # self.start_audio_stream()
+        if self.icon_speaker == "volume-high":
+            self.icon_speaker = 'volume-off'
         else:
-            self.stop_audio_stream()
-            self.icon = 'volume-high'
-        self.audio_streaming = not self.audio_streaming
+            # self.stop_audio_stream()
+            self.icon_speaker = 'volume-high'
+        # self.audio_streaming = not self.audio_streaming
+
+    def toggle_icon_audio(self):
+        if self.icon_audio == 'microphone':
+            self.icon_audio = 'microphone-off'
+        else:
+            self.icon_audio = 'microphone'
 
     def _update_rect(self, instance, value):
         self.rect.size = self.size

@@ -54,21 +54,23 @@ class FeedingReportScreen(Screen):
         today = datetime.now().date()
 
         query = """
-        SELECT b.id, b.baby_name
+        SELECT b.id, b.baby_name, IFNULL(SUM(fe.ml), 0)
         FROM babies b
+        LEFT JOIN food_entries fe ON b.id = fe.baby_id AND DATE(fe.feed_date) = ?
         WHERE b.user_id = ?
+        GROUP BY b.id, b.baby_name
         """
-        cursor.execute(query, (user_id,))
+        cursor.execute(query, (today, user_id))
         babies = cursor.fetchall()
 
         self.ids.cards_container.clear_widgets()
-        for baby_id, baby_name in babies:
-            card = self.create_card(baby_id, baby_name)
+        for baby_id, baby_name, total_milk in babies:
+            card = self.create_card(baby_id, baby_name, total_milk)
             self.ids.cards_container.add_widget(card)
 
         conn.close()
 
-    def create_card(self, baby_id, baby_name):
+    def create_card(self, baby_id, baby_name, total_milk):
         card = MDCard(size_hint=(None, None), size=("280dp", "100dp"),
                       md_bg_color=[225 / 255, 220 / 255, 205 / 255, 1],
                       orientation='vertical',
@@ -87,9 +89,12 @@ class FeedingReportScreen(Screen):
         button_layout.add_widget(milk_ratio_button)
         button_layout.add_widget(other_food_button)
 
-        label_layout = BoxLayout(orientation='vertical', padding=(20, 20, 20, 20), size_hint_y=None, height=40)
+        label_layout = BoxLayout(orientation='vertical',spacing=30, padding=(20, 20, 20, 20), size_hint_y=None, height=40)
         label = MDLabel(text=f"{baby_name}", halign='right', theme_text_color='Custom', text_color=[0.2, 0.2, 0.2, 1])
+        milk_label = MDLabel(text=f"Total Milk: {total_milk} ml", halign='right', theme_text_color='Custom',
+                             text_color=[0.2, 0.2, 0.2, 1])
         label_layout.add_widget(label)
+        label_layout.add_widget(milk_label)
 
         card.add_widget(label_layout)
         card.add_widget(button_layout)
@@ -206,8 +211,7 @@ class FeedingReportScreen(Screen):
                     ("Feed Hour", dp(20)),
                     ("Notes", dp(80)),
                 ],
-                row_data=table_data
-            )
+                row_data=table_data)
 
             layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
             close_button = MDRaisedButton(text='Close', size_hint=(None, None), size=(100, 40))
