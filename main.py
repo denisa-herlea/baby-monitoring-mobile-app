@@ -16,6 +16,7 @@ from kivy.lang import Builder
 from helper import screen_helper
 from kivymd.uix.pickers import MDDatePicker, MDTimePicker
 from kivymd.uix.button import MDFlatButton
+import threading
 
 import cv2
 from kivy.uix.image import Image
@@ -63,60 +64,105 @@ sm.add_widget(MeasurementReportScreen(name='MeasurementReport'))
 class NotificationListener:
     def __init__(self, app):
         self.app = app
-        self.keep_running = True
+        self.keep_running = False
+        self.loop = None
+        self.websocket_task = None
 
     async def connect_websocket(self):
-        uri = "ws://192.168.195.187:5678"
-        while self.keep_running:
+        uri = "ws://192.168.90.187:5678"
+        try:
             async with websockets.connect(uri) as websocket:
-                while True:
+                while self.keep_running:
                     message = await websocket.recv()
                     self.app.send_notification(message)
+        except Exception as e:
+            print(f"WebSocket connection failed: {e}")
 
     def start(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.connect_websocket())
+        self.keep_running = True
+        self.loop = asyncio.new_event_loop()
+        self.websocket_task = threading.Thread(target=self.run_loop)
+        self.websocket_task.start()
+
+    def run_loop(self):
+        asyncio.set_event_loop(self.loop)
+        try:
+            self.loop.run_until_complete(self.connect_websocket())
+        except Exception as e:
+            print(f"Error in run_loop: {e}")
+        finally:
+            self.loop.close()
 
     def stop(self):
         self.keep_running = False
+        if self.loop:
+            self.loop.call_soon_threadsafe(self.loop.stop)
+        if self.websocket_task:
+            self.websocket_task.join()
+
 
 
 class VideoStreamWidget(Image):
+    def __init__(self, **kwargs):
+        super(VideoStreamWidget, self).__init__(**kwargs)
+        self.capture = None
+
     def start_stream(self, url):
+        if self.capture is not None:
+            self.capture.release()
         self.capture = cv2.VideoCapture(url)
+        if not self.capture.isOpened():
+            print(f"Error: Unable to open video stream from {url}")
         Clock.schedule_interval(self.update, 1.0 / 33.0)
 
+    def stop_stream(self):
+        if self.capture is not None:
+            self.capture.release()
+            self.capture = None
+        Clock.unschedule(self.update)
+
     def update(self, dt):
+        if self.capture is None:
+            return
         ret, frame = self.capture.read()
         if ret:
-            buf = cv2.flip(frame, 0).tostring()
+            buf = cv2.flip(frame, 0).tobytes()
             texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='bgr')
             texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
             self.texture = texture
+        else:
+            print("Error: Failed to read frame from video stream")
 
 
 class DemoApp(MDApp):
     current_user_id = None
     notifications_enabled = False
     notification = ""
+    camera_on = False
 
     def build(self):
         self.theme_cls.theme_style = "Light"
         screen = Builder.load_string(screen_helper)
         self.notification_listener = NotificationListener(self)
-        Clock.schedule_once(self.init_websocket)
         return screen
 
     def on_start(self):
+        pass
+
+    def on_stop(self):
         video_screen = self.root.get_screen('Video')
-
         video_widget = video_screen.ids.video_stream
-        video_widget.start_stream('http://192.168.195.187:5000/video_feed')
+        video_widget.stop_stream()
 
-    def init_websocket(self, *args):
-        from threading import Thread
-        Thread(target=self.notification_listener.start).start()
+    def toggle_camera(self, is_active):
+        video_screen = self.root.get_screen('Video')
+        video_widget = video_screen.ids.video_stream
+        if is_active:
+            video_widget.start_stream('http://192.168.90.187:5000/video_feed')
+            self.camera_on = True
+        else:
+            video_widget.stop_stream()
+            self.camera_on = False
 
     def send_notification(self, message):
         print(f"Received notification: {message}")
@@ -130,6 +176,10 @@ class DemoApp(MDApp):
 
     def toggle_notifications(self, value):
         self.notifications_enabled = value
+        if self.notifications_enabled:
+            self.notification_listener.start()
+        else:
+            self.notification_listener.stop()
         self.update_notification_bar()
 
     def update_notification_bar(self):

@@ -90,14 +90,3 @@ class LullabiesScreen(Screen):
     def pause_audio(self):
         if self.currently_playing:
             self.currently_playing.stop()
-
-    async def send_lullaby_command(self):
-        uri = "ws://192.168.195.187:5679"
-        async with websockets.connect(uri) as websocket:
-            await websocket.send("PLAY_LULLABY")
-            response = await websocket.recv()
-            print(response)
-
-    def play(self):
-        asyncio.run(self.send_lullaby_command())
-

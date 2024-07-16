@@ -151,8 +151,6 @@ class AccountScreen(Screen):
             print(f"An error occurred while trying to delete the account: {e}")
         finally:
             conn.close()
-        #self.manager.get_screen('Login').ids.username.text = ''
-        #self.manager.get_screen('Login').ids.password.text = ''
         self.manager.current = 'Login'
 
     def show_success_delete(self):

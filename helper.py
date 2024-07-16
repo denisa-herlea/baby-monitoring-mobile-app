@@ -1226,6 +1226,12 @@ ScreenManager:
         size: root.width, root.height
         pos: 0, 0
         
+    MDSwitch:
+        id: camera_switch
+        pos_hint: {'center_x': 0.5, 'center_y': 0.9}
+        active: False
+        on_active: app.toggle_camera(self.active)
+        
     MDFloatingActionButton:
         icon: root.icon_speaker
         size_hint: None, None

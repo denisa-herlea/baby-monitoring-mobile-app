@@ -41,14 +41,59 @@ class TestLoginFunction(unittest.TestCase):
         self.assertEqual(self.app.current_user_id, 19)
 
     @patch('sqlite3.connect')
-    def test_login_missing_password(self, mock_connect):
+    def test_login_incorrect_password(self, mock_connect):
+        mock_cursor = mock_connect.return_value.cursor.return_value
+        mock_cursor.fetchone.return_value = (19, 'correct_password')
+
+        self.app.login('denisa', 'wrong_password')
+
+        self.assertNotEqual(self.app.root.current, 'Home')
+        self.assertIsNone(self.app.current_user_id)
+        self.assertEqual(self.app.dialog.title, "Error")
+        self.assertEqual(self.app.dialog.text, "Incorect username or password!")
+
+    @patch('sqlite3.connect')
+    def test_login_nonexistent_user(self, mock_connect):
         mock_cursor = mock_connect.return_value.cursor.return_value
         mock_cursor.fetchone.return_value = None
 
+        self.app.login('nonexistent_user', 'some_password')
+
+        self.assertNotEqual(self.app.root.current, 'Home')
+        self.assertIsNone(self.app.current_user_id)
+        self.assertEqual(self.app.dialog.title, "Error")
+        self.assertEqual(self.app.dialog.text, "Incorect username or password!")
+
+    def test_login_empty_username_password(self):
+        self.app.login('', '')
+
+        self.assertNotEqual(self.app.root.current, 'Home')
+        self.assertIsNone(self.app.current_user_id)
+        self.assertEqual(self.app.root.get_screen('Login').ids.login_username.line_color_normal,
+                         self.app.theme_cls.error_color)
+        self.assertEqual(self.app.root.get_screen('Login').ids.login_password.line_color_normal,
+                         self.app.theme_cls.error_color)
+
+    def test_login_empty_username(self):
+        self.app.login('', 'some_password')
+
+        self.assertNotEqual(self.app.root.current, 'Home')
+        self.assertIsNone(self.app.current_user_id)
+        self.assertEqual(self.app.root.get_screen('Login').ids.login_username.line_color_normal,
+                         self.app.theme_cls.error_color)
+        self.assertEqual(self.app.root.get_screen('Login').ids.login_password.line_color_normal,
+                         self.app.theme_cls.primary_color)
+
+    def test_login_empty_password(self):
         self.app.login('denisa', '')
 
-        login_screen = self.app.root.get_screen('Login')
-        self.assertEqual(login_screen.ids['login_password'].line_color_normal, self.app.theme_cls.error_color)
+        self.assertNotEqual(self.app.root.current, 'Home')
+        self.assertIsNone(self.app.current_user_id)
+        self.assertEqual(self.app.root.get_screen('Login').ids.login_username.line_color_normal,
+                         self.app.theme_cls.primary_color)
+        self.assertEqual(self.app.root.get_screen('Login').ids.login_password.line_color_normal,
+                         self.app.theme_cls.error_color)
+
 
 if __name__ == '__main__':
     unittest.main()
